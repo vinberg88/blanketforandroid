@@ -1,6 +1,4 @@
-<img src="brand/logo.svg" alt="Blanket" width="128" height="128" align="left"/>
-
-# Blanket
+# Blanket for ANDROID
 
 **Listen to different sounds**
 
