@@ -1,6 +1,6 @@
 # Blanket for ANDROID
 
-
+<img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
 **Listen to different sounds**
 
