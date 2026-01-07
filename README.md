@@ -2,6 +2,8 @@
 
 **Listen to different sounds**
 
+## Description
+Improve focus and increase your productivity by listening to different sounds. Blanket can also be used to help you to fall asleep in a noisy environment.
 <br>
 
 [![GNMOME Circle](https://gitlab.gnome.org/Teams/Circle/-/raw/master/assets/button/badge.svg)](https://circle.gnome.org/)
