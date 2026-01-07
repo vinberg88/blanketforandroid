@@ -7,9 +7,10 @@ import android.util.Log
 import com.vinberg88.blanketforandroid.model.Sound
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 
 class AudioPlayer(private val context: Context) {
-    private val players = mutableMapOf<String, MediaPlayer>()
+    private val players: MutableMap<String, MediaPlayer> = ConcurrentHashMap()
 
     suspend fun loadSound(sound: Sound) = withContext(Dispatchers.IO) {
         try {
