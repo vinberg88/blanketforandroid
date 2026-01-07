@@ -2,7 +2,7 @@
 
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
-Thanks to Mattias Vinberg for build for Android - https://github.com/vinberg88 - Thanks to Rafael Mardojai CM for the original Blanket application - 2026
+Thanks to Mattias Vinberg for build for Android - https://github.com/vinberg88 - Thanks to Rafael Mardojai CM for the original Blanket application - 2026 - https://github.com/rafaelmardojai
 
 **Listen to different sounds**
 
