@@ -24,13 +24,6 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private val hasAutoStarted = AtomicBoolean(false)
 
     init {
-        // Load all sounds
-        viewModelScope.launch {
-            availableSounds.forEach { sound ->
-                audioPlayer.loadSound(sound)
-            }
-        }
-
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
@@ -38,8 +31,14 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
             }
         }
 
-        // Load saved sound states
+        // Load saved sound states and auto-restore
         viewModelScope.launch {
+            // First, load all sounds to avoid race condition
+            availableSounds.forEach { sound ->
+                audioPlayer.loadSound(sound)
+            }
+            
+            // Then, observe state changes and auto-restore if needed
             combine(
                 availableSounds.map { sound ->
                     prefsRepository.getSoundState(sound.id)
