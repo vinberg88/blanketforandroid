@@ -18,6 +18,11 @@ import com.vinberg88.blanketforandroid.model.availableSounds
 import com.vinberg88.blanketforandroid.ui.components.SoundTile
 import com.vinberg88.blanketforandroid.viewmodel.BlanketViewModel
 
+private val BOTTOM_BAR_HEIGHT = 80.dp
+private val PLAY_BUTTON_SIZE = 56.dp
+private val PLAY_ICON_SIZE = 32.dp
+private val HORIZONTAL_PADDING = 8.dp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: BlanketViewModel) {
@@ -38,7 +43,7 @@ fun MainScreen(viewModel: BlanketViewModel) {
             BottomAppBar(
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.height(80.dp)
+                modifier = Modifier.height(BOTTOM_BAR_HEIGHT)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -47,12 +52,12 @@ fun MainScreen(viewModel: BlanketViewModel) {
                 ) {
                     FilledIconButton(
                         onClick = { viewModel.togglePlayPause() },
-                        modifier = Modifier.size(56.dp)
+                        modifier = Modifier.size(PLAY_BUTTON_SIZE)
                     ) {
                         Icon(
                             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (isPlaying) "Pause" else "Play",
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(PLAY_ICON_SIZE)
                         )
                     }
                 }
@@ -64,7 +69,7 @@ fun MainScreen(viewModel: BlanketViewModel) {
             contentPadding = paddingValues,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = HORIZONTAL_PADDING)
         ) {
             items(availableSounds) { sound ->
                 val state = soundStates[sound.id]

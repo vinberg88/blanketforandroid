@@ -3,6 +3,7 @@ package com.vinberg88.blanketforandroid.audio
 import android.content.Context
 import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
+import android.util.Log
 import com.vinberg88.blanketforandroid.model.Sound
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,9 +22,10 @@ class AudioPlayer(private val context: Context) {
                 }
                 afd.close()
                 players[sound.id] = mediaPlayer
+                Log.d(TAG, "Successfully loaded sound: ${sound.id}")
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to load sound: ${sound.id}, file: ${sound.fileName}", e)
         }
     }
 
@@ -68,5 +70,9 @@ class AudioPlayer(private val context: Context) {
     fun release() {
         players.values.forEach { it.release() }
         players.clear()
+    }
+
+    companion object {
+        private const val TAG = "AudioPlayer"
     }
 }

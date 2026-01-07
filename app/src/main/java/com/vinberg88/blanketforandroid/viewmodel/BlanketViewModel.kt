@@ -9,6 +9,7 @@ import com.vinberg88.blanketforandroid.model.SoundState
 import com.vinberg88.blanketforandroid.model.availableSounds
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 class BlanketViewModel(application: Application) : AndroidViewModel(application) {
     private val audioPlayer = AudioPlayer(application)
@@ -20,7 +21,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
     
-    private var hasAutoStarted = false
+    private val hasAutoStarted = AtomicBoolean(false)
 
     init {
         // Load all sounds
@@ -49,8 +50,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 _soundStates.value = states
                 
                 // Auto-restore playback on first load if was playing
-                if (!hasAutoStarted && _isPlaying.value) {
-                    hasAutoStarted = true
+                if (hasAutoStarted.compareAndSet(false, true) && _isPlaying.value) {
                     states.values.forEach { state ->
                         if (state.isEnabled) {
                             audioPlayer.setVolume(state.soundId, state.volume)

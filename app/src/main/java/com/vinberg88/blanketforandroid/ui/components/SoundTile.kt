@@ -15,6 +15,14 @@ import androidx.compose.ui.unit.dp
 import com.vinberg88.blanketforandroid.ui.theme.BlueAccent
 import com.vinberg88.blanketforandroid.ui.theme.DarkSurfaceVariant
 
+private val ICON_SIZE = 72.dp
+private val ICON_INNER_SIZE = 36.dp
+private val NAME_HEIGHT = 40.dp
+private val SLIDER_WIDTH = 100.dp
+private val TILE_PADDING = 8.dp
+private val SPACING_SMALL = 4.dp
+private val SPACING_MEDIUM = 8.dp
+
 @Composable
 fun SoundTile(
     icon: ImageVector,
@@ -27,13 +35,13 @@ fun SoundTile(
 ) {
     Column(
         modifier = modifier
-            .padding(8.dp),
+            .padding(TILE_PADDING),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Circular icon area
         Box(
             modifier = Modifier
-                .size(72.dp)
+                .size(ICON_SIZE)
                 .clip(CircleShape)
                 .background(if (isEnabled) BlueAccent else DarkSurfaceVariant)
                 .clickable(onClick = onToggle),
@@ -42,12 +50,12 @@ fun SoundTile(
             Icon(
                 imageVector = icon,
                 contentDescription = name,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(ICON_INNER_SIZE),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(SPACING_MEDIUM))
 
         // Sound name
         Text(
@@ -56,16 +64,16 @@ fun SoundTile(
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             maxLines = 2,
-            modifier = Modifier.height(40.dp)
+            modifier = Modifier.height(NAME_HEIGHT)
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(SPACING_SMALL))
 
         // Volume slider
         Slider(
             value = volume,
             onValueChange = onVolumeChange,
-            modifier = Modifier.width(100.dp),
+            modifier = Modifier.width(SLIDER_WIDTH),
             enabled = isEnabled,
             colors = SliderDefaults.colors(
                 thumbColor = BlueAccent,
