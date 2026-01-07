@@ -71,7 +71,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
             
             if (newEnabled && _isPlaying.value) {
                 audioPlayer.play(soundId)
-            } else {
+            } else if (!newEnabled && _isPlaying.value) {
                 audioPlayer.pause(soundId)
             }
         }
