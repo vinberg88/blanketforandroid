@@ -59,7 +59,7 @@ Blanket is translated into several languages. If your language is missing or inc
 
 ## Credits
 Developed by **[Rafael Mardojai CM](https://github.com/rafaelmardojai)** and [contributors](https://github.com/rafaelmardojai/blanket/graphs/contributors).
-Developed by Mattias Vinberg - Android - 2025 - https://vinberg88.github.io/
+Developed by [Mattias Vinberg](https://github.com/vinberg88) - Android - 2025 - https://vinberg88.github.io/
 
 Thanks to Jorge Toledo for the name idea.
 
