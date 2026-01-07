@@ -1,6 +1,6 @@
 package com.vinberg88.blanketforandroid.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -20,7 +20,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun BlanketForAndroidTheme(
-    darkTheme: Boolean = true,
+
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
