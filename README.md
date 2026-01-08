@@ -2,6 +2,8 @@
 
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 Thanks to Mattias Vinberg for build for Android - https://github.com/vinberg88 - Thanks to Rafael Mardojai CM for the original Blanket application - 2026 - https://github.com/rafaelmardojai
 
 **Listen to different sounds**
@@ -73,6 +75,10 @@ For detailed information about sounds licensing, [check this file](https://githu
 - [feeltheblow](https://feeltheblow.web.app/) - Web App inspired by Blanket
 - [Soothing Noise Player](https://f-droid.org/en/packages/ie.delilahsthings.soothingloop/),  [Napify](https://play.google.com/store/apps/details?id=com.pronaycoding.blanket_mobile) - Android apps inspired by Blanket
 - [Blanket Web](https://apps.roanapur.de/blanket/) - Web clone of Blanket
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
 
 # Sounds Licensing
 
