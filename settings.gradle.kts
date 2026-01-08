@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BlanketForAndroid"
+rootProject.name = "Blanket"
 include(":app")
