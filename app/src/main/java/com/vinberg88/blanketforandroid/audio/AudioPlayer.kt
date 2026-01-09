@@ -12,21 +12,25 @@ import java.util.concurrent.ConcurrentHashMap
 class AudioPlayer(private val context: Context) {
     private val players: MutableMap<String, MediaPlayer> = ConcurrentHashMap()
 
-    suspend fun loadSound(sound: Sound) = withContext(Dispatchers.IO) {
-        try {
-            if (!players.containsKey(sound.id)) {
-                val afd: AssetFileDescriptor = context.assets.openFd("sounds/${sound.fileName}")
-                val mediaPlayer = MediaPlayer().apply {
-                    setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                    isLooping = true
-                    prepare()
+    suspend fun loadSound(sound: Sound) {
+        withContext(Dispatchers.IO) {
+            try {
+                if (!players.containsKey(sound.id)) {
+                    val afd: AssetFileDescriptor = context.assets.openFd("sounds/${sound.fileName}")
+                    val mediaPlayer = MediaPlayer().apply {
+                        setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                        isLooping = true
+                        prepare()
+                    }
+                    afd.close()
+                    players[sound.id] = mediaPlayer
+                    Log.d(TAG, "Successfully loaded sound: ${sound.id}")
                 }
-                afd.close()
-                players[sound.id] = mediaPlayer
-                Log.d(TAG, "Successfully loaded sound: ${sound.id}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load sound: ${sound.id}, file: ${sound.fileName}", e)
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to load sound: ${sound.id}, file: ${sound.fileName}", e)
+
+            Unit
         }
     }
 
