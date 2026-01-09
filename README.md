@@ -16,6 +16,33 @@ Improve focus and increase your productivity by listening to different sounds. B
 ## Description
 IF you use LINUX look here.
 
+## Build from source (Android)
+
+This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack Compose).
+
+### Requirements
+- Android Studio (recommended) or a working Android SDK + JDK setup
+- Android SDK available via `local.properties` (`sdk.dir=...`) or `ANDROID_SDK_ROOT`
+
+### Build (command line)
+
+- Debug APK:
+	- Build: `./gradlew :app:buildBlanketApk`
+	- Output: `dist/blanket.apk`
+
+- Installable APK for testing (debug-signed):
+	- Build: `./gradlew :app:buildBlanketInternalApk`
+	- Output: `dist/blanket-internal.apk`
+
+- Release APK:
+	- Build: `./gradlew :app:buildBlanketReleaseApk`
+	- Output: `dist/blanket-release.apk`
+	- Note: release signing is not configured by default; for production you should add a real keystore.
+
+### Useful tasks
+- Show signing configs: `./gradlew :app:signingReport`
+- Compatibility signing validation: `./gradlew :app:validateReleaseSigning`
+
 ## Install
 
 <a href="https://flathub.org/apps/details/com.rafaelmardojai.Blanket"><img width="200" alt="Download on Flathub" src="https://flathub.org/api/badge?svg&locale=en"/></a>

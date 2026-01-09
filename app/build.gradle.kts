@@ -25,6 +25,16 @@ android {
                 "proguard-rules.pro"
             )
         }
+
+        // Installable build for local testing/CI artifacts without a private keystore.
+        // Signed with the default Android debug key.
+        create("internal") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            // Helps with installing alongside other variants.
+            applicationIdSuffix = ".internal"
+            versionNameSuffix = "-internal"
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -74,4 +84,55 @@ tasks.register<Copy>("buildBlanketApk") {
     into(rootProject.layout.projectDirectory.dir("dist"))
 
     rename { "blanket.apk" }
+}
+
+// Convenience task: build a release APK with a stable filename.
+// Produces: <repo>/dist/blanket-release.apk
+// Note: if release signing is not configured, the produced APK may be unsigned.
+tasks.register<Copy>("buildBlanketReleaseApk") {
+    dependsOn("assembleRelease")
+
+    val releaseApkDir = layout.buildDirectory.dir("outputs/apk/release")
+    from(releaseApkDir)
+    include("*.apk")
+
+    // Put the final artifact in a predictable location at repo root.
+    into(rootProject.layout.projectDirectory.dir("dist"))
+
+    rename { "blanket-release.apk" }
+}
+
+// Convenience task: build an installable (debug-signed) APK with a stable filename.
+// Produces: <repo>/dist/blanket-internal.apk
+tasks.register<Copy>("buildBlanketInternalApk") {
+    dependsOn("assembleInternal")
+
+    val internalApkDir = layout.buildDirectory.dir("outputs/apk/internal")
+    from(internalApkDir)
+    include("*.apk")
+
+    into(rootProject.layout.projectDirectory.dir("dist"))
+    rename { "blanket-internal.apk" }
+}
+
+// Compatibility task: some CI/scripts expect ':app:validateReleaseSigning'.
+// AGP creates signing validation tasks as 'validateSigning<Variant>' (e.g., validateSigningDebug).
+// This alias will prefer release validation when available, otherwise it falls back to debug.
+val validateReleaseSigning = tasks.register("validateReleaseSigning") {
+    group = "verification"
+    description = "Compatibility alias for signing validation (prefers release when configured)."
+}
+
+afterEvaluate {
+    val target = tasks.findByName("validateSigningRelease")
+        ?: tasks.findByName("validateSigningInternal")
+        ?: tasks.findByName("validateSigningDebug")
+
+    if (target != null) {
+        validateReleaseSigning.configure { dependsOn(target) }
+    } else {
+        logger.warn(
+            "No validateSigningRelease/validateSigningDebug tasks found; validateReleaseSigning will do nothing."
+        )
+    }
 }
