@@ -1,4 +1,4 @@
-# Blanket for ANDROID - Listen to different sounds and relax
+# Blanket for ANDROID - Listen to different sounds and Relax. 
 
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
@@ -8,7 +8,7 @@ Thanks to Mattias Vinberg for build for Android - https://github.com/vinberg88 -
 
 **Listen to different sounds**
 
-## Description
+## Description - Blanket
 Improve focus and increase your productivity by listening to different sounds. Blanket can also be used to help you to fall asleep in a noisy environment.
 <br>
 
