@@ -139,6 +139,12 @@ Note: release signing is not configured by default; for production you should ad
 
 ------------------------------------------
 
+<img width="1024" height="1536" alt="Blanket" src="https://github.com/user-attachments/assets/aaa8f5f9-7b5b-41de-bc1f-428eeab112e1" />
+
+Android - What it looks like =)
+
+------------------------------------------
+
 ## Build from source (Android) A few more facts
 
 This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack Compose).
