@@ -16,7 +16,7 @@ Improve focus and increase your productivity by listening to different sounds. B
 
 
 ## Description
-IF you use LINUX look here.
+I use ubuntu 24.04 to build blanket APK
 
 ## Build from source (Android)
 
@@ -62,6 +62,8 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 | MX Linux | [`blanket`](http://mxrepo.com/mx/repo/pool/main/b/blanket/) | [SwampRabbit](https://github.com/SwampRabbit) |
 
 ### Build from source for linux
+
+IF you use LINUX look here.
 
 You can clone and run from GNOME Builder.
 
