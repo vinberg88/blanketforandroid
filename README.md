@@ -60,13 +60,17 @@ mv cmdline-tools/* cmdline-tools/latest/
 
 -------------------
 
-Add this to bashrc file
+Add this to bashrc file...
 
 sudo nano ~/.bashrc
 
 export ANDROID_HOME=$HOME/Android/Sdk
+
 export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+
 export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+Last Activate the changes....
 
 source ~/.bashrc
 
