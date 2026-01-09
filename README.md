@@ -1,4 +1,4 @@
-# Blanket for ANDROID
+# Blanket for ANDROID - Listen to different sounds and relax
 
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
@@ -16,9 +16,126 @@ Improve focus and increase your productivity by listening to different sounds. B
 
 
 ## Description
-I use ubuntu 24.04 to build blanket APK
+I use ubuntu 24.04 to build blanket APK file - 2026
 
-## Build from source (Android)
+-------------------
+
+HOW TO BUILD BLANKET FOR ANDROID - 2026 - Ubuntu 24.04
+
+-------------------
+
+First Thing update all.
+
+sudo apt update
+sudo apt upgrade
+
+-------------------
+
+Install some programs for Android and Ubuntu.
+
+sudo apt install kotlin gradle bash git wget curl npm jet* cmake* openjdk-17-jdk unzip libc6* zlib1g*
+
+-------------------
+
+install OpenJDK - JAVA for ANDROID - extra install.
+
+sudo add-apt-repository ppa:openjdk-r/ppa
+
+sudo apt-get update
+
+sudo apt-get install openjdk-8-jdk
+
+-------------------
+
+Install Android SDK (CLI) for WSL - Ubuntu 24.04
+
+mkdir -p ~/Android/Sdk
+cd ~/Android/Sdk
+
+wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip commandlinetools-linux-*.zip
+
+mkdir -p cmdline-tools/latest
+mv cmdline-tools/* cmdline-tools/latest/
+
+-------------------
+
+Add this to bashrc file
+
+sudo nano ~/.bashrc
+
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+source ~/.bashrc
+
+-------------------
+
+Time to build Android files for Ubuntu 24.04 and  Blanket.
+
+Copy and paste....
+
+sdkmanager --licenses
+
+Press y - All SDK package licenses accepted...
+
+Next install all....
+
+sdkmanager \
+"cmake;4.1.2" \
+"platform-tools" \
+"platforms;android-34" \
+"build-tools;36.1.0" \
+"cmdline-tools;latest" \
+"ndk;29.0.14206865"
+
+-------------------
+
+CD out from DIR - files.... cd
+
+-----------------
+
+Clone Repo from GitHub - Blanket
+
+git clone https://github.com/vinberg88/blanketforandroid.git blanket
+
+-----------------
+
+Build so Ubuntu can find Sdk...
+
+cd /home/adolf/blanket
+
+sudo nano local.properties
+
+sdk.dir=/home/adolf/Android/Sdk
+
+-----------------
+
+REBOOT UBUNTU - REBOOT UBUNTU - REBOOT UBUNTU - REBOOT UBUNTU
+
+-----------------
+
+Time to build app - Build (command line) so we have an APP. Choose which one suits you...
+
+Copy and Paste: cd /home/adolf/blanket
+
+Debug APK:
+Build: sudo ./gradlew :app:buildBlanketApk
+Output: dist/blanket.apk
+
+Installable APK for testing (debug-signed):
+Build: sudo ./gradlew :app:buildBlanketInternalApk
+Output: dist/blanket-internal.apk
+
+Release APK:
+Build: sudo ./gradlew :app:buildBlanketReleaseApk
+Output: dist/blanket-release.apk
+Note: release signing is not configured by default; for production you should add a real keystore.
+
+------------------------------------------
+
+## Build from source (Android) A few more facts
 
 This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack Compose).
 
@@ -129,3 +246,5 @@ This project is licensed under the MIT License — see the [LICENSE](./LICENSE) 
 | [Wind](https://freesound.org/people/felix.blume/sounds/217506/) | felix.blume | Porrumentzio | CC0
 
 (*) Editing implies making the sound meet [this guidelines](https://github.com/rafaelmardojai/blanket/blob/master/CONTRIBUTING.md#sounds).
+
+Thank you! ❤️ for watching - Regards Mattias Vinberg - Ubuntu - Android - Blanket - Stockholm - Sweden - 2025
