@@ -1,12 +1,14 @@
-# Blanket for ANDROID
+# Blanket for ANDROID - Listen to different sounds and Relax. 
 
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 Thanks to Mattias Vinberg for build for Android - https://github.com/vinberg88 - Thanks to Rafael Mardojai CM for the original Blanket application - 2026 - https://github.com/rafaelmardojai
 
 **Listen to different sounds**
 
-## Description
+## Description - Blanket
 Improve focus and increase your productivity by listening to different sounds. Blanket can also be used to help you to fall asleep in a noisy environment.
 <br>
 
@@ -14,9 +16,136 @@ Improve focus and increase your productivity by listening to different sounds. B
 
 
 ## Description
-IF you use LINUX look here.
+I use ubuntu 24.04 to build blanket APK file - 2026
 
-## Build from source (Android)
+-------------------
+
+HOW TO BUILD BLANKET FOR ANDROID - 2026 - Ubuntu 24.04
+
+-------------------
+
+First Thing update all.
+
+sudo apt update
+sudo apt upgrade
+
+-------------------
+
+Install some programs for Android and Ubuntu.
+
+sudo apt install kotlin gradle bash git wget curl npm jet* cmake* openjdk-17-jdk unzip libc6* zlib1g*
+
+-------------------
+
+install OpenJDK - JAVA for ANDROID - extra install.
+
+sudo add-apt-repository ppa:openjdk-r/ppa
+
+sudo apt-get update
+
+sudo apt-get install openjdk-8-jdk
+
+-------------------
+
+Install Android SDK (CLI) for WSL - Ubuntu 24.04
+
+mkdir -p ~/Android/Sdk
+cd ~/Android/Sdk
+
+wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip commandlinetools-linux-*.zip
+
+mkdir -p cmdline-tools/latest
+mv cmdline-tools/* cmdline-tools/latest/
+
+-------------------
+
+Add this to bashrc file...
+
+sudo nano ~/.bashrc
+
+export ANDROID_HOME=$HOME/Android/Sdk
+
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+Last Activate the changes....
+
+source ~/.bashrc
+
+-------------------
+
+Time to build Android files for Ubuntu 24.04 and  Blanket.
+
+Copy and paste....
+
+sdkmanager --licenses
+
+Press y - All SDK package licenses accepted...
+
+Next install all....
+
+sdkmanager \
+"cmake;4.1.2" \
+"platform-tools" \
+"platforms;android-34" \
+"build-tools;36.1.0" \
+"cmdline-tools;latest" \
+"ndk;29.0.14206865"
+
+-------------------
+
+CD out from DIR - files.... cd
+
+-----------------
+
+Clone Repo from GitHub - Blanket
+
+git clone https://github.com/vinberg88/blanketforandroid.git blanket
+
+-----------------
+
+Build so Ubuntu can find Sdk...
+
+cd /home/adolf/blanket
+
+sudo nano local.properties
+
+sdk.dir=/home/adolf/Android/Sdk
+
+-----------------
+
+REBOOT UBUNTU - REBOOT UBUNTU - REBOOT UBUNTU - REBOOT UBUNTU
+
+-----------------
+
+Time to build app - Build (command line) so we have an APP. Choose which one suits you...
+
+Copy and Paste: cd /home/adolf/blanket
+
+Debug APK:
+Build: sudo ./gradlew :app:buildBlanketApk
+Output: dist/blanket.apk
+
+Installable APK for testing (debug-signed):
+Build: sudo ./gradlew :app:buildBlanketInternalApk
+Output: dist/blanket.apk
+
+Release APK:
+Build: sudo ./gradlew :app:buildBlanketReleaseApk
+Output: dist/blanket.apk
+Note: release signing is not configured by default; for production you should add a real keystore.
+
+------------------------------------------
+
+<img width="1024" height="1536" alt="Blanket" src="https://github.com/user-attachments/assets/aaa8f5f9-7b5b-41de-bc1f-428eeab112e1" />
+
+Android - What it looks like =)
+
+------------------------------------------
+
+## Build from source (Android) A few more facts
 
 This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack Compose).
 
@@ -32,11 +161,11 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 
 - Installable APK for testing (debug-signed):
 	- Build: `./gradlew :app:buildBlanketInternalApk`
-	- Output: `dist/blanket-internal.apk`
+	- Output: `dist/blanket.apk`
 
 - Release APK:
 	- Build: `./gradlew :app:buildBlanketReleaseApk`
-	- Output: `dist/blanket-release.apk`
+	- Output: `dist/blanket.apk`
 	- Note: release signing is not configured by default; for production you should add a real keystore.
 
 ### Useful tasks
@@ -60,6 +189,8 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 | MX Linux | [`blanket`](http://mxrepo.com/mx/repo/pool/main/b/blanket/) | [SwampRabbit](https://github.com/SwampRabbit) |
 
 ### Build from source for linux
+
+IF you use LINUX look here.
 
 You can clone and run from GNOME Builder.
 
@@ -101,6 +232,10 @@ For detailed information about sounds licensing, [check this file](https://githu
 - [Soothing Noise Player](https://f-droid.org/en/packages/ie.delilahsthings.soothingloop/),  [Napify](https://play.google.com/store/apps/details?id=com.pronaycoding.blanket_mobile) - Android apps inspired by Blanket
 - [Blanket Web](https://apps.roanapur.de/blanket/) - Web clone of Blanket
 
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
+
 # Sounds Licensing
 
 | Sound | Author | Editor* | License
@@ -121,3 +256,11 @@ For detailed information about sounds licensing, [check this file](https://githu
 | [Wind](https://freesound.org/people/felix.blume/sounds/217506/) | felix.blume | Porrumentzio | CC0
 
 (*) Editing implies making the sound meet [this guidelines](https://github.com/rafaelmardojai/blanket/blob/master/CONTRIBUTING.md#sounds).
+
+## Related Projects
+- [Blankie](https://github.com/codybrom/blankie) - Native macOS app inspired by Blanket
+- [feeltheblow](https://feeltheblow.web.app/) - Web App inspired by Blanket
+- [Soothing Noise Player](https://f-droid.org/en/packages/ie.delilahsthings.soothingloop/),  [Napify](https://play.google.com/store/apps/details?id=com.pronaycoding.blanket_mobile) - Android apps inspired by Blanket
+- [Blanket Web](https://apps.roanapur.de/blanket/) - Web clone of Blanket
+
+Thank you! ❤️ for watching - Regards Mattias Vinberg - Ubuntu - Android - Blanket - Stockholm - Sweden - 2025
