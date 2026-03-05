@@ -8,7 +8,8 @@ data class Sound(
     val id: String,
     val fileName: String,
     val displayName: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val isCustom: Boolean = false
 )
 
 val availableSounds = listOf(
