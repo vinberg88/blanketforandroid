@@ -7,7 +7,7 @@
 - Persistence is **DataStore Preferences** (per-sound enabled + volume + global isPlaying).
 
 ## Where to look first
-- Architecture writeups: `BUILD_NOTES.md`, `IMPLEMENTATION.md`
+- Architecture writeups: `docs/BUILD_NOTES.md`, `docs/IMPLEMENTATION.md`
 - App module Gradle: `app/build.gradle.kts`
 - Compose entry point: `app/src/main/java/com/vinberg88/blanketforandroid/MainActivity.kt`
 
