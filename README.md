@@ -135,33 +135,33 @@ sdk.dir=/home/adolf/Android/Sdk
 
 -----------------
 
-LAST COPY AND PASTE ALL IN TERMINAL.
+LAST COPY AND PASTE ALL IN TERMINAL FOR UBUNTU 24.04
 
-set -e
-cd /home/adolf/blanket
+  set -e
+  cd /home/adolf/blanket
 
-export ANDROID_SDK_ROOT=/home/adolf/Android/Sdk
-export ANDROID_HOME=/home/adolf/Android/Sdk
-mkdir -p "$ANDROID_SDK_ROOT"
+   export ANDROID_SDK_ROOT=/home/adolf/Android/Sdk
+   export ANDROID_HOME=/home/adolf/Android/Sdk
+   mkdir -p "$ANDROID_SDK_ROOT"
 
-# hitta sdkmanager
-SDKMANAGER="$(find "$ANDROID_SDK_ROOT" -type f -name sdkmanager | head -n 1 || true)"
-echo "SDKMANAGER=$SDKMANAGER"
 
-if [ -z "$SDKMANAGER" ]; then
-  echo "Ingen sdkmanager hittades i $ANDROID_SDK_ROOT"
-  echo "Installera 'Android SDK Command-line Tools (latest)' i Android Studio -> SDK Manager -> SDK Tools"
-  exit 1
-fi
+   SDKMANAGER="$(find "$ANDROID_SDK_ROOT" -type f -name sdkmanager | head -n 1 || true)"
+   echo "SDKMANAGER=$SDKMANAGER"
 
-yes | "$SDKMANAGER" --licenses
-"$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+   if [ -z "$SDKMANAGER" ]; then
+    echo "Ingen sdkmanager hittades i $ANDROID_SDK_ROOT"
+    echo "Installera 'Android SDK Command-line Tools (latest)' i Android Studio -> SDK Manager -> SDK Tools"
+    exit 1
+    fi
 
-ls -la "$ANDROID_SDK_ROOT/platforms/android-34"
-ls -la "$ANDROID_SDK_ROOT/build-tools/34.0.0"
+  yes | "$SDKMANAGER" --licenses
+  "$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
-GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew --stop || true
-GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew clean :app:buildBlanketInternalApk --stacktrace
+  ls -la "$ANDROID_SDK_ROOT/platforms/android-34"
+  ls -la "$ANDROID_SDK_ROOT/build-tools/34.0.0"
+
+  GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew --stop || true
+  GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew clean :app:buildBlanketInternalApk --stacktrace
 
 -----------------
 
