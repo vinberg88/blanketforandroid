@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +24,7 @@ private val SLIDER_WIDTH = 100.dp
 private val TILE_PADDING = 8.dp
 private val SPACING_SMALL = 4.dp
 private val SPACING_MEDIUM = 8.dp
+private val DELETE_BUTTON_SIZE = 20.dp
 
 @Composable
 fun SoundTile(
@@ -31,28 +34,51 @@ fun SoundTile(
     volume: Float,
     onToggle: () -> Unit,
     onVolumeChange: (Float) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDelete: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
             .padding(TILE_PADDING),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Circular icon area
+        // Circular icon area with optional delete button overlay
         Box(
-            modifier = Modifier
-                .size(ICON_SIZE)
-                .clip(CircleShape)
-                .background(if (isEnabled) BlueAccent else DarkSurfaceVariant)
-                .clickable(onClick = onToggle),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.TopEnd
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = name,
-                modifier = Modifier.size(ICON_INNER_SIZE),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+            Box(
+                modifier = Modifier
+                    .size(ICON_SIZE)
+                    .clip(CircleShape)
+                    .background(if (isEnabled) BlueAccent else DarkSurfaceVariant)
+                    .clickable(onClick = onToggle),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = name,
+                    modifier = Modifier.size(ICON_INNER_SIZE),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            if (onDelete != null) {
+                Box(
+                    modifier = Modifier
+                        .size(DELETE_BUTTON_SIZE)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.error)
+                        .clickable(onClick = onDelete),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Remove $name",
+                        tint = MaterialTheme.colorScheme.onError,
+                        modifier = Modifier.size(DELETE_BUTTON_SIZE)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(SPACING_MEDIUM))

@@ -29,8 +29,8 @@
 - Use Gradle wrapper from repo root.
 - Stable artifact tasks (copy outputs into `dist/`):
   - `./gradlew :app:buildBlanketApk` → `dist/blanket.apk` (debug)
-  - `./gradlew :app:buildBlanketInternalApk` → `dist/blanket-internal.apk` (debug-signed "internal" build)
-  - `./gradlew :app:buildBlanketReleaseApk` → `dist/blanket-release.apk` (release; signing not configured by default)
+  - `./gradlew :app:buildBlanketInternalApk` → `dist/blanket.apk` (debug-signed "internal" build)
+  - `./gradlew :app:buildBlanketReleaseApk` → `dist/blanket.apk` (release; signing not configured by default)
 - Signing checks:
   - `./gradlew :app:signingReport`
   - Compatibility alias: `./gradlew :app:validateReleaseSigning` (prefers release/internal/debug validation)

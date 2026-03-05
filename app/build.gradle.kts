@@ -87,7 +87,7 @@ tasks.register<Copy>("buildBlanketApk") {
 }
 
 // Convenience task: build a release APK with a stable filename.
-// Produces: <repo>/dist/blanket-release.apk
+// Produces: <repo>/dist/blanket.apk
 // Note: if release signing is not configured, the produced APK may be unsigned.
 tasks.register<Copy>("buildBlanketReleaseApk") {
     dependsOn("assembleRelease")
@@ -99,11 +99,11 @@ tasks.register<Copy>("buildBlanketReleaseApk") {
     // Put the final artifact in a predictable location at repo root.
     into(rootProject.layout.projectDirectory.dir("dist"))
 
-    rename { "blanket-release.apk" }
+    rename { "blanket.apk" }
 }
 
 // Convenience task: build an installable (debug-signed) APK with a stable filename.
-// Produces: <repo>/dist/blanket-internal.apk
+// Produces: <repo>/dist/blanket.apk
 tasks.register<Copy>("buildBlanketInternalApk") {
     dependsOn("assembleInternal")
 
@@ -112,7 +112,7 @@ tasks.register<Copy>("buildBlanketInternalApk") {
     include("*.apk")
 
     into(rootProject.layout.projectDirectory.dir("dist"))
-    rename { "blanket-internal.apk" }
+    rename { "blanket.apk" }
 }
 
 // Compatibility task: some CI/scripts expect ':app:validateReleaseSigning'.

@@ -130,11 +130,11 @@ Output: dist/blanket.apk
 
 Installable APK for testing (debug-signed):
 Build: sudo ./gradlew :app:buildBlanketInternalApk
-Output: dist/blanket-internal.apk
+Output: dist/blanket.apk
 
 Release APK:
 Build: sudo ./gradlew :app:buildBlanketReleaseApk
-Output: dist/blanket-release.apk
+Output: dist/blanket.apk
 Note: release signing is not configured by default; for production you should add a real keystore.
 
 ------------------------------------------
@@ -161,11 +161,11 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 
 - Installable APK for testing (debug-signed):
 	- Build: `./gradlew :app:buildBlanketInternalApk`
-	- Output: `dist/blanket-internal.apk`
+	- Output: `dist/blanket.apk`
 
 - Release APK:
 	- Build: `./gradlew :app:buildBlanketReleaseApk`
-	- Output: `dist/blanket-release.apk`
+	- Output: `dist/blanket.apk`
 	- Note: release signing is not configured by default; for production you should add a real keystore.
 
 ### Useful tasks
