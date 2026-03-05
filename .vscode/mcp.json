@@ -1,18 +1,5 @@
 {
 	"servers": {
-		"com.microsoft/azure": {
-			"type": "stdio",
-			"command": "dnx",
-			"args": [
-				"Azure.Mcp@2.0.0-beta.24",
-				"--yes",
-				"--",
-				"server",
-				"start"
-			],
-			"gallery": "https://api.mcp.github.com",
-			"version": "2.0.0-beta.24"
-		},
 		"io.github.github/github-mcp-server": {
 			"type": "stdio",
 			"command": "docker",
@@ -27,18 +14,18 @@
 			"gallery": "https://api.mcp.github.com",
 			"version": "0.31.0"
 		},
-		"microsoft/azure-devops-mcp": {
+		"com.microsoft/azure": {
 			"type": "stdio",
-			"command": "npx",
+			"command": "dnx",
 			"args": [
-				"-y",
-				"@azure-devops/mcp@latest",
-				"${input:ado_org}",
-				"-d",
-				"${input:ado_domain}"
+				"Azure.Mcp@2.0.0-beta.24",
+				"--yes",
+				"--",
+				"server",
+				"start"
 			],
 			"gallery": "https://api.mcp.github.com",
-			"version": "1.0.0"
+			"version": "2.0.0-beta.24"
 		}
 	},
 	"inputs": [
@@ -47,18 +34,6 @@
 			"type": "promptString",
 			"description": "",
 			"password": true
-		},
-		{
-			"id": "ado_org",
-			"type": "promptString",
-			"description": "Azure DevOps organization name (e.g., contoso).",
-			"password": false
-		},
-		{
-			"id": "ado_domain",
-			"type": "promptString",
-			"description": "Repeat to enable specific domains: core, work, work-items, search, test-plans, repositories, wiki, pipelines, advanced-security.",
-			"password": false
 		}
 	]
 }
