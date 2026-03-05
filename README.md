@@ -172,6 +172,20 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 - Show signing configs: `./gradlew :app:signingReport`
 - Compatibility signing validation: `./gradlew :app:validateReleaseSigning`
 
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+- **[Build Notes](docs/BUILD_NOTES.md)** - Detailed build instructions, project structure, and features
+- **[Azure CI/CD](docs/AZURE_CICD.md)** - Azure Pipelines configuration for building APK files
+- **[Implementation Guide](docs/IMPLEMENTATION.md)** - Technical architecture and design decisions
+- **[Testing Guide](docs/TESTING_GUIDE.md)** - Step-by-step testing instructions
+- **[UI Design](docs/UI_DESIGN.md)** - Visual design reference and theming
+- **[Summary](docs/SUMMARY.md)** - Implementation summary and overview
+
+For developers contributing to the project, also see:
+- **[PR Overview](docs/development/PR_OVERVIEW.md)** - Pull request guidelines and structure
+
 ## Install
 
 <a href="https://flathub.org/apps/details/com.rafaelmardojai.Blanket"><img width="200" alt="Download on Flathub" src="https://flathub.org/api/badge?svg&locale=en"/></a>

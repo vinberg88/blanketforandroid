@@ -90,11 +90,11 @@ com.vinberg88.blanketforandroid/
 
 | File | Description |
 |------|-------------|
-| `BUILD_NOTES.md` | Build instructions & features |
-| `IMPLEMENTATION.md` | Technical architecture (10KB) |
-| `TESTING_GUIDE.md` | Step-by-step testing (8KB) |
-| `UI_DESIGN.md` | Visual design reference (5KB) |
-| `SUMMARY.md` | Implementation summary (8KB) |
+| `docs/BUILD_NOTES.md` | Build instructions & features |
+| `docs/IMPLEMENTATION.md` | Technical architecture (10KB) |
+| `docs/TESTING_GUIDE.md` | Step-by-step testing (8KB) |
+| `docs/UI_DESIGN.md` | Visual design reference (5KB) |
+| `docs/SUMMARY.md` | Implementation summary (8KB) |
 
 ## ✅ Acceptance Criteria
 

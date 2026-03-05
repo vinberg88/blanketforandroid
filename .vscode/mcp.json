@@ -1,0 +1,39 @@
+{
+	"servers": {
+		"io.github.github/github-mcp-server": {
+			"type": "stdio",
+			"command": "docker",
+			"args": [
+				"run",
+				"-i",
+				"--rm",
+				"-e",
+				"GITHUB_PERSONAL_ACCESS_TOKEN=${input:token}",
+				"ghcr.io/github/github-mcp-server:0.31.0"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.31.0"
+		},
+		"com.microsoft/azure": {
+			"type": "stdio",
+			"command": "dnx",
+			"args": [
+				"Azure.Mcp@2.0.0-beta.24",
+				"--yes",
+				"--",
+				"server",
+				"start"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "2.0.0-beta.24"
+		}
+	},
+	"inputs": [
+		{
+			"id": "token",
+			"type": "promptString",
+			"description": "",
+			"password": true
+		}
+	]
+}
