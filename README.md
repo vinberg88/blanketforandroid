@@ -177,6 +177,7 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 - **[Build Notes](docs/BUILD_NOTES.md)** - Detailed build instructions, project structure, and features
+- **[Azure CI/CD](docs/AZURE_CICD.md)** - Azure Pipelines configuration for building APK files
 - **[Implementation Guide](docs/IMPLEMENTATION.md)** - Technical architecture and design decisions
 - **[Testing Guide](docs/TESTING_GUIDE.md)** - Step-by-step testing instructions
 - **[UI Design](docs/UI_DESIGN.md)** - Visual design reference and theming

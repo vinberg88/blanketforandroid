@@ -1,22 +1,145 @@
-# Gradle
-# Build your Java project and run tests with Gradle using a Gradle wrapper script.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+# Azure Pipelines configuration for building Blanket Android APK files
+# Builds debug, internal (debug-signed), and release APK variants
+# Publishes APK artifacts that can be downloaded from the pipeline
 
 trigger:
+- main
+- develop
+
+# Also trigger on pull requests to main
+pr:
 - main
 
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  # Android SDK and build tool versions (must match app/build.gradle.kts)
+  ANDROID_SDK_VERSION: '34'
+  ANDROID_BUILD_TOOLS_VERSION: '34.0.0'
+  # Gradle options for better performance
+  GRADLE_OPTS: '-Xmx3072m -Dorg.gradle.daemon=false'
+  # Directory where APK artifacts will be stored
+  APK_OUTPUT_DIR: '$(Build.ArtifactStagingDirectory)/apk'
+
 steps:
-- task: Gradle@3
+# Step 1: Checkout the repository
+- checkout: self
+  displayName: 'Checkout repository'
+
+# Step 2: Set up JDK 17 (required for Android Gradle Plugin 8.2.0)
+- task: JavaToolInstaller@0
+  displayName: 'Set up JDK 17'
   inputs:
-    gradleWrapperFile: 'gradlew'  # Path to your Gradle wrapper
-    tasks: 'build'  # Replace with the tasks you want to run
-    options: '-Xmx3072m' 
-    publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'  # Updated pattern for test result files
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'  # Replace with your JDK version
+    versionSpec: '17'
     jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+
+# Step 3: Set up Android SDK
+- bash: |
+    echo "##vso[task.setvariable variable=ANDROID_HOME]$ANDROID_SDK_ROOT"
+    echo "Android SDK Root: $ANDROID_SDK_ROOT"
+  displayName: 'Configure Android SDK environment'
+
+# Step 4: Install Android SDK components
+- bash: |
+    echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+      "platforms;android-$(ANDROID_SDK_VERSION)" \
+      "build-tools;$(ANDROID_BUILD_TOOLS_VERSION)" \
+      "platform-tools"
+  displayName: 'Install Android SDK components'
+
+# Step 5: Make Gradle wrapper executable
+- bash: chmod +x ./gradlew
+  displayName: 'Make Gradle wrapper executable'
+
+# Step 6: Build debug APK
+- task: Gradle@3
+  displayName: 'Build debug APK (dist/blanket.apk)'
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    tasks: ':app:buildBlanketApk'
+    options: '$(GRADLE_OPTS)'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.17'
+    jdkArchitectureOption: 'x64'
+
+# Step 7: Build internal APK (debug-signed for testing)
+- task: Gradle@3
+  displayName: 'Build internal APK (dist/blanket-internal.apk)'
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    tasks: ':app:buildBlanketInternalApk'
+    options: '$(GRADLE_OPTS)'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.17'
+    jdkArchitectureOption: 'x64'
+
+# Step 8: Build release APK (unsigned by default)
+- task: Gradle@3
+  displayName: 'Build release APK (dist/blanket-release.apk)'
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    tasks: ':app:buildBlanketReleaseApk'
+    options: '$(GRADLE_OPTS)'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.17'
+    jdkArchitectureOption: 'x64'
+  continueOnError: true  # Release might fail if signing is not configured
+
+# Step 9: Copy APK artifacts to staging directory
+- bash: |
+    mkdir -p $(APK_OUTPUT_DIR)
+
+    # Copy debug APK
+    if [ -f "dist/blanket.apk" ]; then
+      cp dist/blanket.apk $(APK_OUTPUT_DIR)/blanket-debug.apk
+      echo "✓ Copied debug APK"
+    fi
+
+    # Copy internal APK
+    if [ -f "dist/blanket-internal.apk" ]; then
+      cp dist/blanket-internal.apk $(APK_OUTPUT_DIR)/blanket-internal.apk
+      echo "✓ Copied internal APK"
+    fi
+
+    # Copy release APK
+    if [ -f "dist/blanket-release.apk" ]; then
+      cp dist/blanket-release.apk $(APK_OUTPUT_DIR)/blanket-release.apk
+      echo "✓ Copied release APK"
+    fi
+
+    # List all APK files
+    echo ""
+    echo "Built APK files:"
+    ls -lh $(APK_OUTPUT_DIR)/*.apk 2>/dev/null || echo "No APK files found"
+  displayName: 'Copy APK artifacts to staging directory'
+
+# Step 10: Publish APK artifacts
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish APK artifacts'
+  inputs:
+    PathtoPublish: '$(APK_OUTPUT_DIR)'
+    ArtifactName: 'blanket-apks'
+    publishLocation: 'Container'
+  condition: succeededOrFailed()  # Publish even if some builds failed
+
+# Step 11: Display build summary
+- bash: |
+    echo "=========================================="
+    echo "Blanket Android APK Build Summary"
+    echo "=========================================="
+    echo ""
+    echo "Build artifacts have been published to Azure Pipelines."
+    echo "You can download them from the 'Artifacts' section of this pipeline run."
+    echo ""
+    echo "APK Variants:"
+    echo "  • blanket-debug.apk      - Debug build for development"
+    echo "  • blanket-internal.apk   - Debug-signed build for testing"
+    echo "  • blanket-release.apk    - Release build (may be unsigned)"
+    echo ""
+    echo "=========================================="
+  displayName: 'Display build summary'

@@ -12,6 +12,13 @@ This directory contains comprehensive documentation for the Blanket for Android 
   - Dependencies and requirements
   - Known limitations
 
+- **[AZURE_CICD.md](AZURE_CICD.md)** - Azure Pipelines CI/CD for building APK files
+  - Setting up Azure Pipelines
+  - Automated APK builds (debug, internal, release)
+  - Downloading build artifacts
+  - Configuring release signing
+  - Troubleshooting builds
+
 - **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Step-by-step instructions for testing the app
   - Prerequisites
   - Build instructions
@@ -52,10 +59,12 @@ This directory contains comprehensive documentation for the Blanket for Android 
 docs/
 ├── README.md                    # This file
 ├── BUILD_NOTES.md              # Build instructions
+├── AZURE_CICD.md               # Azure Pipelines CI/CD
 ├── IMPLEMENTATION.md           # Technical architecture
 ├── TESTING_GUIDE.md            # Testing procedures
 ├── UI_DESIGN.md                # Design reference
 ├── SUMMARY.md                  # Implementation summary
+├── GRADLE_CONFIGURATION.md     # Gradle configuration
 └── development/
     └── PR_OVERVIEW.md          # PR guidelines
 ```
@@ -63,10 +72,11 @@ docs/
 ## 🚀 Quick Start
 
 1. **New to the project?** Start with [BUILD_NOTES.md](BUILD_NOTES.md)
-2. **Want to build?** See [BUILD_NOTES.md](BUILD_NOTES.md) or [TESTING_GUIDE.md](TESTING_GUIDE.md)
-3. **Understanding the code?** Read [IMPLEMENTATION.md](IMPLEMENTATION.md)
-4. **Working on UI?** Check [UI_DESIGN.md](UI_DESIGN.md)
-5. **Contributing?** See [development/PR_OVERVIEW.md](development/PR_OVERVIEW.md)
+2. **Want to build locally?** See [BUILD_NOTES.md](BUILD_NOTES.md) or [TESTING_GUIDE.md](TESTING_GUIDE.md)
+3. **Want to build with Azure?** See [AZURE_CICD.md](AZURE_CICD.md)
+4. **Understanding the code?** Read [IMPLEMENTATION.md](IMPLEMENTATION.md)
+5. **Working on UI?** Check [UI_DESIGN.md](UI_DESIGN.md)
+6. **Contributing?** See [development/PR_OVERVIEW.md](development/PR_OVERVIEW.md)
 
 ## 📖 Related Documentation
 
