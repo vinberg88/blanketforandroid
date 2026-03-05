@@ -27,6 +27,7 @@ HOW TO BUILD BLANKET FOR ANDROID - 2026 - Ubuntu 24.04
 First Thing update all.
 
 sudo apt update
+
 sudo apt upgrade
 
 -------------------
