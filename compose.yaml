@@ -1,0 +1,6 @@
+services:
+  blanketforandroid:
+    image: blanketforandroid
+    build:
+      context: .
+      dockerfile: ./Dockerfile

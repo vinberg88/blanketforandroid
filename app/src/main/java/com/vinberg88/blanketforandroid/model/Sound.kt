@@ -8,15 +8,16 @@ data class Sound(
     val id: String,
     val fileName: String,
     val displayName: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val isCustom: Boolean = false
 )
 
 val availableSounds = listOf(
-    Sound("birds", "Birds.wav", "Birds", Icons.Default.FlutterDash),
+    Sound("birds", "Birds.wav", "Birds", Icons.Default.Pets),
     Sound("boat", "Boat.wav", "Boat", Icons.Default.DirectionsBoat),
-    Sound("coffee_shop", "CoffeeShop.wav", "Coffee Shop", Icons.Default.Coffee),
+    Sound("coffee_shop", "CoffeeShop.wav", "Coffee Shop", Icons.Default.LocalCafe),
     Sound("fireplace", "Fireplace.wav", "Fireplace", Icons.Default.LocalFireDepartment),
-    Sound("hello", "Hello.wav", "Hello", Icons.Default.Waving),
+    Sound("hello", "Hello.wav", "Hello", Icons.Default.RecordVoiceOver),
     Sound("metro", "Metro.wav", "Metro", Icons.Default.Train),
     Sound("nyc", "NYC.wav", "New York City", Icons.Default.LocationCity),
     Sound("night", "Night.wav", "Night", Icons.Default.NightsStay),

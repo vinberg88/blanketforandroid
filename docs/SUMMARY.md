@@ -83,11 +83,11 @@ Successfully implemented a complete Blanket audio mixer app for Android with dar
 
 ### 10. Documentation
 ✅ Created comprehensive documentation:
-- `BUILD_NOTES.md`: Updated with architecture and features
-- `IMPLEMENTATION.md`: Detailed technical documentation
-- `TESTING_GUIDE.md`: Step-by-step testing instructions
-- `UI_DESIGN.md`: Visual design reference
-- `SUMMARY.md`: This file
+- `docs/BUILD_NOTES.md`: Updated with architecture and features
+- `docs/IMPLEMENTATION.md`: Detailed technical documentation
+- `docs/TESTING_GUIDE.md`: Step-by-step testing instructions
+- `docs/UI_DESIGN.md`: Visual design reference
+- `docs/SUMMARY.md`: This file
 
 ### 11. Resources
 ✅ Created `dimens.xml`:
@@ -145,7 +145,7 @@ Successfully implemented a complete Blanket audio mixer app for Android with dar
 - Should build successfully in Android Studio
 
 ⏳ **Manual Testing**: Requires Android Studio
-- Full testing checklist provided in TESTING_GUIDE.md
+- Full testing checklist provided in docs/TESTING_GUIDE.md
 - App should build and run on API 21+ devices
 
 ## Files Changed
@@ -162,11 +162,11 @@ Successfully implemented a complete Blanket audio mixer app for Android with dar
 9. `app/src/main/java/.../ui/components/SoundTile.kt`
 10. `app/src/main/java/.../ui/screens/MainScreen.kt`
 11. `app/src/main/res/values/dimens.xml`
-12. `BUILD_NOTES.md` (updated)
-13. `IMPLEMENTATION.md`
-14. `TESTING_GUIDE.md`
-15. `UI_DESIGN.md`
-16. `SUMMARY.md`
+12. `docs/BUILD_NOTES.md` (updated)
+13. `docs/IMPLEMENTATION.md`
+14. `docs/TESTING_GUIDE.md`
+15. `docs/UI_DESIGN.md`
+16. `docs/SUMMARY.md`
 
 ### Modified Files (4)
 1. `app/build.gradle.kts` - Added Compose and DataStore dependencies
@@ -207,7 +207,7 @@ implementation("androidx.datastore:datastore-preferences:1.0.0")
 2. Sync Gradle (automatic)
 3. Build project
 4. Run on emulator or device
-5. Follow TESTING_GUIDE.md for comprehensive testing
+5. Follow docs/TESTING_GUIDE.md for comprehensive testing
 6. Take screenshots for documentation
 
 ### For User
