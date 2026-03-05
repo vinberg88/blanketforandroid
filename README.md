@@ -87,13 +87,31 @@ Press y - All SDK package licenses accepted...
 
 Next install all....
 
-sdkmanager \
-"cmake;4.1.2" \
-"platform-tools" \
-"platforms;android-34" \
-"build-tools;36.1.0" \
-"cmdline-tools;latest" \
-"ndk;29.0.14206865"
+sudo sdkmanager --install "platform-tools"
+
+sudo sdkmanager --install "build-tools;37.0.0-rc2"
+
+sudo sdkmanager --install "cmake;4.1.2"
+
+sudo sdkmanager --install "cmdline-tools;latest"
+
+sudo sdkmanager --install "ndk;29.0.14206865"
+
+sudo sdkmanager --install "platforms;android-36.1"
+
+sudo sdkmanager --install "sources;android-36.1"
+
+sudo sdkmanager --install "android-desktop;x86_64"
+
+sudo sdkmanager --install "system-images;android-35;google_apis;x86_64"
+
+sudo sdkmanager --install "build-tools;37.0.0-rc2"
+
+sudo sdkmanager --install "platforms;android-34"
+
+sudo sdkmanager --install "build-tools;34.0.0"
+
+sudo sdkmanager --install "platforms;android-34"
 
 -------------------
 
@@ -114,6 +132,36 @@ cd /home/adolf/blanket
 sudo nano local.properties
 
 sdk.dir=/home/adolf/Android/Sdk
+
+-----------------
+
+LAST COPY AND PASTE ALL IN TERMINAL.
+
+set -e
+cd /home/adolf/blanket
+
+export ANDROID_SDK_ROOT=/home/adolf/Android/Sdk
+export ANDROID_HOME=/home/adolf/Android/Sdk
+mkdir -p "$ANDROID_SDK_ROOT"
+
+# hitta sdkmanager
+SDKMANAGER="$(find "$ANDROID_SDK_ROOT" -type f -name sdkmanager | head -n 1 || true)"
+echo "SDKMANAGER=$SDKMANAGER"
+
+if [ -z "$SDKMANAGER" ]; then
+  echo "Ingen sdkmanager hittades i $ANDROID_SDK_ROOT"
+  echo "Installera 'Android SDK Command-line Tools (latest)' i Android Studio -> SDK Manager -> SDK Tools"
+  exit 1
+fi
+
+yes | "$SDKMANAGER" --licenses
+"$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+ls -la "$ANDROID_SDK_ROOT/platforms/android-34"
+ls -la "$ANDROID_SDK_ROOT/build-tools/34.0.0"
+
+GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew --stop || true
+GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew clean :app:buildBlanketInternalApk --stacktrace
 
 -----------------
 
