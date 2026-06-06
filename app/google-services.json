@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "577487398518",
+    "project_id": "mattiasvinberg",
+    "storage_bucket": "mattiasvinberg.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577487398518:android:d63659b329b290f3872157",
+        "android_client_info": {
+          "package_name": "com.vinberg88.blanketforandroid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDIeeYQxHZxkRfCnNZ39fp6JAWAm0SVD0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
