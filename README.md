@@ -2,6 +2,9 @@
 
 # Blanket for ANDROID - Listen to different sounds and Relax. 
 
+UPDATE 2026-06-17 - I have posted BLANKET to play store and are waiting for the green light to publish Blanket
+for all user via GOOGLE. But it take some time.... No stress
+
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
