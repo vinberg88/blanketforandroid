@@ -55,14 +55,17 @@ sudo apt-get install openjdk-8-jdk
 
 Install Android SDK (CLI) for WSL - Ubuntu 24.04
 
-mkdir -p ~/Android/Sdk
+sudo mkdir -p ~/Android/Sdk
+
 cd ~/Android/Sdk
 
-wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-unzip commandlinetools-linux-*.zip
+sudo wget https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip
 
-mkdir -p cmdline-tools/latest
-mv cmdline-tools/* cmdline-tools/latest/
+sudo unzip commandlinetools-linux-*.zip
+
+sudo mkdir -p cmdline-tools/latest
+
+sudo mv cmdline-tools/* cmdline-tools/latest/
 
 -------------------
 
