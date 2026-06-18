@@ -63,167 +63,134 @@ Improve focus and increase your productivity by listening to different sounds. B
 <img width="570" height="650" alt="image" src="https://github.com/user-attachments/assets/91e1c6ce-80da-4a98-85a0-21925584f293" />
 
 ## Description
-I use ubuntu 24.04 to build blanket APK file - 2026
+
+I use ubuntu 26.04 to build blanket APK files - 2026
 
 -------------------
 
-HOW TO BUILD BLANKET FOR ANDROID - 2026 - Ubuntu 24.04
+HOW TO BUILD BLANKET FOR ANDROID - 2026 - Ubuntu 26.04
 
 -------------------
 
-First Thing update all.
+First Thing update all - Ubuntu 26.04
 
 sudo apt update
 
-sudo apt upgrade
+sudo apt full-upgrade -y
 
 -------------------
 
 Install some programs for Android and Ubuntu.
 
-sudo apt install kotlin gradle bash meson git wget curl npm jet* cmake* openjdk-17-jdk unzip libc6* zlib1g*
+sudo apt install git curl wget unzip zip openjdk-17-jdk build-essential git-all gradle* software-properties-common
+sudo apt install sdk* android-platform-system-core-headers ninja-build bash meson ninja* curl npm jet* cmake* libc6* zlib1g* notification-daemon
+sudo apt install -y python3 python3-pip python3-venv golang-go pipx
+sudo apt install snapd*
+sudo snap install snapd
+sudo snap install kotlin --classic
+sudo snap install android-studio --Classic
+sudo apt install adb google-android-platform-37-installer
 
 -------------------
 
-install OpenJDK - JAVA for ANDROID - extra install.
+Install Node och pnpm - Ubuntu 26.04
 
-sudo add-apt-repository ppa:openjdk-r/ppa
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
 
-sudo apt-get update
+nvm install 22
+nvm use 22
 
-sudo apt-get install openjdk-8-jdk
+corepack enable
+corepack prepare pnpm@9.12.0 --activate
 
--------------------
+---------------------
 
-sudo apt install google-android-cmdline-tools-13.0-installer
+2. Setup Java for Ubuntu 26.04
 
-sudo apt install google-android-platform-34-installer
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH="$JAVA_HOME/bin:$PATH"
+java -version
 
--------------------
+---------------------
 
-Install Android SDK (CLI) for WSL - Ubuntu 24.04
+3. Add to sudo nano ~/.bashrc
 
-sudo mkdir -p ~/Android/Sdk
+export ANDROID_HOME="$HOME/Android/Sdk"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+Copy and paste THIS
+
+source ~/.bashrc
+adb version
+sdkmanager --version
+
+---------------------
+
+Install Android SDK for Ubuntu 26.04
+
+mkdir -p ~/Android/Sdk/cmdline-tools
 
 cd ~/Android/Sdk
 
-sudo wget https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip
+curl -LO https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip
 
-sudo unzip commandlinetools-linux-*.zip
+unzip commandlinetools-linux-14742923_latest.zip
 
 sudo mkdir -p cmdline-tools/latest
 
-sudo mv cmdline-tools/* cmdline-tools/latest/
+sudo mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
 
--------------------
+---------------------
 
-Add this to bashrc file...
-
-sudo nano ~/.bashrc
-
-export ANDROID_HOME=$HOME/Android/Sdk
-
-export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-
-Last Activate the changes....
-
-source ~/.bashrc
-
--------------------
-
-Time to build Android files for Ubuntu 24.04 and  Blanket.
+Time to build Android files for Ubuntu 24.04 and Blanket - Install Android SDK
 
 Copy and paste....
 
-sudo sdkmanager --licenses
+sudo yes | sudo sdkmanager --licenses
 
-Press y - All SDK package licenses accepted...
-
-Next install all....
-
+sdkmanager "platforms;android-37.0"
+sdkmanager "build-tools;37.0.0-rc2"
+sudo sdkmanager --install "platform-tools;37.0.0"
+sudo sdkmanager --install "ndk;r30-beta1"
+sudo sdkmanager --install "ndk-bundle;r30-beta1"
+sudo sdkmanager --install "emulator;36.6.6"
+sudo sdkmanager --install "extras;android;m2repository;47"
+sudo sdkmanager --install "tools;26.1.1"
+sudo sdkmanager --install "cmdline-tools;latest"
 sudo sdkmanager --install "platform-tools"
-
-sudo sdkmanager --install "build-tools;37.0.0-rc2"
-
 sudo sdkmanager --install "cmake;4.1.2"
 
-sudo sdkmanager --install "cmdline-tools;latest"
-
-sudo sdkmanager --install "ndk;29.0.14206865"
-
-sudo sdkmanager --install "platforms;android-35"
-
-sudo sdkmanager --install "sources;android-35"
-
-sudo sdkmanager --install "android-desktop;x86_64"
-
-sudo sdkmanager --install "system-images;android-35;google_apis;x86_64"
-
-sudo sdkmanager --install "build-tools;37.0.0-rc2"
-
-sudo sdkmanager --install "platforms;android-35"
-
-sudo sdkmanager --install "build-tools;34.0.0"
-
-sudo sdkmanager --install "build-tools;37.0.0-rc2" "cmake;4.1.2" "cmdline-tools;latest" "ndk;30.0.14904198"
-
-sudo sdkmanager --install "platforms;android-35" "sources;android-35" "system-images;android-35;default;x86_64"
-
 -------------------
-
-CD out from DIR - files.... cd
-
------------------
 
 Clone Repo from GitHub - Blanket
 
 git clone https://github.com/vinberg88/blanketforandroid.git blanket
+cd blanket
 
 -----------------
 
-Build so Ubuntu can find Sdk...
+Build so Ubuntu can find Sdk. Copy and Paste =]
 
-cd /home/adolf/blanket
-
-sudo nano local.properties
-
-sdk.dir=/home/adolf/Android/Sdk
+cat > local.properties <<EOF
+sdk.dir=$HOME/Android/Sdk
+EOF
 
 -----------------
 
-LAST COPY AND PASTE ALL IN TERMINAL FOR UBUNTU 24.04
+LAST COPY AND PASTE ALL IN TERMINAL FOR UBUNTU 26.04 - NO STRESS =]
 
-  set -e
-  cd /home/adolf/blanket
+pnpm install
 
-   export ANDROID_SDK_ROOT=/home/adolf/Android/Sdk
-   export ANDROID_HOME=/home/adolf/Android/Sdk
-   mkdir -p "$ANDROID_SDK_ROOT"
+npx expo-doctor --verbose
 
+npx expo install --check
 
-   SDKMANAGER="$(find "$ANDROID_SDK_ROOT" -type f -name sdkmanager | head -n 1 || true)"
-   echo "SDKMANAGER=$SDKMANAGER"
-
-   if [ -z "$SDKMANAGER" ]; then
-    echo "Ingen sdkmanager hittades i $ANDROID_SDK_ROOT"
-    echo "Installera 'Android SDK Command-line Tools (latest)' i Android Studio -> SDK Manager -> SDK Tools"
-    exit 1
-    fi
-
-  yes | "$SDKMANAGER" --licenses
-  "$SDKMANAGER" --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-
-  ls -la "$ANDROID_SDK_ROOT/platforms/android-35"
-  ls -la "$ANDROID_SDK_ROOT/build-tools/35.0.0"
-
-  GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew --stop || true
-  GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew clean :app:buildBlanketInternalApk --stacktrace
-
------------------
-
-REBOOT UBUNTU - REBOOT UBUNTU - REBOOT UBUNTU - REBOOT UBUNTU
+npx expo prebuild --platform android --Clean
 
 -----------------
 
