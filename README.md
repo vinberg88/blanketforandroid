@@ -5,6 +5,49 @@
 UPDATE 2026-06-17 - I have posted BLANKET to play store and are waiting for the green light to publish Blanket
 for all user via GOOGLE. But it take some time.... No stress
 
+## UPDATE 2026-06-18 - Blanket Android mixer refresh
+
+The Android version has been updated to feel closer to the original Blanket desktop app while still being comfortable on a phone.
+
+What changed:
+
+- New Blanket launcher icon for Android install/app drawer.
+- More compact sound mixer layout with 4 sounds per row.
+- Custom line-style icons for Rain, Storm and Waves, inspired by the original Blanket screenshot.
+- Master volume slider in the bottom control bar.
+- Sleep timer with 15, 30 and 60 minute options.
+- Smooth fade in and fade out when sounds start, stop, pause or resume.
+- Imported/custom sounds can now be edited:
+  - rename the sound
+  - choose an icon
+  - delete the sound from the edit dialog
+- Imported sounds still use Android document permissions so they can keep working after app restart.
+- Gradle memory setting was lowered from 2048 MB to 1024 MB to make local builds easier on smaller machines.
+
+Build verification used for this update:
+
+- `./gradlew.bat :app:compileDebugKotlin --no-daemon`
+- `./gradlew.bat assembleDebug --no-daemon`
+
+## UPDATE 2026-06-18 - Play Store launch preparation
+
+The Android project has also been prepared for a Google Play launch.
+
+What changed:
+
+- Android target/compile SDK is now API 35 for current Google Play requirements.
+- Added release signing support through a local `keystore.properties` file.
+- Added Android App Bundle build task for Play Store upload:
+  - `./gradlew :app:buildBlanketReleaseBundle`
+  - output: `dist/blanket.aab`
+- Added an in-app About/Credits dialog with privacy and sound licensing notes.
+- Added [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) for Play Console.
+- Added [`docs/PLAY_STORE_RELEASE.md`](docs/PLAY_STORE_RELEASE.md) with release signing, Data Safety and launch checklist.
+- Added [`docs/play-store/listing.md`](docs/play-store/listing.md) and a 1024 x 500 feature graphic for store listing work.
+- Added `.github/dependabot.yml` so GitHub can open weekly dependency/security update PRs for Gradle and GitHub Actions.
+
+Before uploading to Google Play, create your private upload key locally and add a local `keystore.properties` file. Do not commit the keystore or passwords.
+
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
