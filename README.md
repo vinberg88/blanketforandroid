@@ -80,7 +80,7 @@ sudo apt full-upgrade -y
 
 -------------------
 
-Install some programs for Android and Ubuntu.
+Install some programs for Android and Ubuntu - 26.04
 
 sudo apt install git curl wget unzip zip openjdk-17-jdk build-essential git-all gradle* software-properties-common
 
@@ -102,14 +102,14 @@ sudo apt install adb google-android-platform-37-installer
 
 Install Node och pnpm - Ubuntu 26.04
 
-   curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-   source ~/.bashrc
+- curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+- source ~/.bashrc
 
-   nvm install 22
-   nvm use 22
+- nvm install 22
+- nvm use 22
 
-   corepack enable
-   corepack prepare pnpm@9.12.0 --activate
+- corepack enable
+- corepack prepare pnpm@9.12.0 --activate
 
 ---------------------
 
