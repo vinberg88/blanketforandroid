@@ -98,7 +98,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     
     // DataStore for persistence
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
 }
 
 // Convenience task: build a single APK with a stable filename.
