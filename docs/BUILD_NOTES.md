@@ -6,8 +6,8 @@ This is an Android Studio-ready Gradle project with full Blanket audio mixer imp
 
 - **Language**: Kotlin
 - **minSdk**: 21
-- **compileSdk**: 34
-- **targetSdk**: 34
+- **compileSdk**: 35
+- **targetSdk**: 35
 - **Package**: com.vinberg88.blanketforandroid
 - **Build System**: Gradle 8.2 with Kotlin DSL
 - **Android Gradle Plugin**: 8.2.0
@@ -25,6 +25,9 @@ This is an Android Studio-ready Gradle project with full Blanket audio mixer imp
 ✅ Dark theme matching Blanket Linux design
 ✅ Multi-track audio playback with MediaPlayer
 ✅ Per-sound volume control and looping
+✅ Master volume, sleep timer, and fade in/out
+✅ Local imported custom sounds with edit/delete support
+✅ Play Store Android App Bundle task
 ✅ State persistence with DataStore
 ✅ Auto-restore last mix on app launch
 ✅ 14 bundled ambient sounds in assets/sounds/
@@ -74,6 +77,9 @@ com.vinberg88.blanketforandroid/
 # Build release APK
 ./gradlew assembleRelease
 
+# Build release Android App Bundle for Google Play
+./gradlew :app:buildBlanketReleaseBundle
+
 # Install on connected device
 ./gradlew installDebug
 ```
@@ -85,13 +91,13 @@ com.vinberg88.blanketforandroid/
   - Dark background (#1E1E1E)
   - Blue accent color (#4A90E2)
   - Light text for optimal contrast
-- **Sound Grid**: 2-column grid layout with all 14 sounds
+- **Sound Grid**: compact 4-column mixer layout with all bundled and custom sounds
 - **Sound Tiles**: Each tile includes:
   - Circular icon area (blue when active, dark when inactive)
   - Material icon placeholder for each sound
   - Sound display name (e.g., "Coffee Shop", "New York City")
   - Volume slider (0-100%)
-- **Bottom Bar**: Centered Play/Pause button to control entire mix
+- **Bottom Bar**: master volume, Play/Pause, sleep timer, and About controls
 - **Top Bar**: Simple app title "Blanket"
 
 ### Audio Engine
@@ -99,11 +105,13 @@ com.vinberg88.blanketforandroid/
 - **Seamless Looping**: All sounds configured to loop continuously
 - **Per-sound Volume**: Independent volume control (0.0 - 1.0) for each track
 - **Play/Pause All**: Master control to pause/resume all active sounds
+- **Fade In/Out**: Smooth transitions when sounds start, stop, pause, or resume
 - **Efficient Loading**: Sounds loaded asynchronously from assets
 
 ### State Persistence (DataStore)
 - **Sound States**: Persists enabled/disabled state and volume for each sound
 - **Playback State**: Remembers if mix was playing when app closed
+- **Custom Sounds**: Persists imported sound metadata and Android document access
 - **Auto-restore**: On app launch, automatically restores and starts last mix
 
 ### Sound Library
@@ -152,8 +160,10 @@ The project includes these Android dependencies:
 2. Tap sound tiles to enable/disable individual sounds
 3. Adjust sliders to set volume for each sound
 4. Tap the Play button at the bottom to start your mix
-5. Tap Pause to stop all sounds
-6. Your mix is automatically saved and will resume when you reopen the app
+5. Adjust master volume for the full mix
+6. Use the timer button to stop after 15, 30, or 60 minutes
+7. Add custom sounds from local audio files
+8. Your mix is automatically saved and will resume when you reopen the app
 
 ### For Developers
 The app follows MVVM architecture with Compose:
@@ -165,9 +175,7 @@ The app follows MVVM architecture with Compose:
 ## Future Enhancements
 
 Potential improvements for future versions:
-1. Custom sound icons instead of Material icon placeholders
-2. Import custom sounds from device storage
-3. Save and load named presets/mixes
-4. Background playback service with notification controls
-5. Sleep timer functionality
-6. Additional sound effects (equalizer, fade in/out)
+1. Save and load named presets/mixes
+2. Background playback service with notification controls
+3. Additional sound effects or equalizer controls
+4. More custom line icons for all bundled sounds

@@ -14,12 +14,14 @@ import com.vinberg88.blanketforandroid.model.Sound
 import com.vinberg88.blanketforandroid.model.SoundState
 import com.vinberg88.blanketforandroid.model.availableSounds
 import com.vinberg88.blanketforandroid.model.iconForName
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class BlanketViewModel(application: Application) : AndroidViewModel(application) {
     private val audioPlayer = AudioPlayer(application)
     private val prefsRepository = PreferencesRepository(application)

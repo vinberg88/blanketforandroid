@@ -53,6 +53,7 @@ fun MainScreen(viewModel: BlanketViewModel) {
     val sleepTimerMinutes by viewModel.sleepTimerMinutes.collectAsState()
     val context = LocalContext.current
     var showTimerDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
     var editingSound by remember { mutableStateOf<Sound?>(null) }
     var editName by remember { mutableStateOf("") }
     var editIconName by remember { mutableStateOf("music_note") }
@@ -130,6 +131,13 @@ fun MainScreen(viewModel: BlanketViewModel) {
                         Icon(
                             imageVector = if (sleepTimerMinutes == null) Icons.Default.Timer else Icons.Default.TimerOff,
                             contentDescription = "Sleep timer"
+                        )
+                    }
+
+                    IconButton(onClick = { showAboutDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "About Blanket"
                         )
                     }
                 }
@@ -233,6 +241,28 @@ fun MainScreen(viewModel: BlanketViewModel) {
                 }
             },
             confirmButton = {}
+        )
+    }
+
+    if (showAboutDialog) {
+        AlertDialog(
+            onDismissRequest = { showAboutDialog = false },
+            title = { Text("About Blanket") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Blanket for Android 1.0")
+                    Text("Ambient sounds for focus, sleep and calm.")
+                    Text("Android version by Mattias Vinberg.")
+                    Text("Inspired by the original Blanket app by Rafael Mardojai CM and contributors.")
+                    Text("Built-in sounds keep their original licenses. Imported sounds stay on this device.")
+                    Text("No ads, accounts, analytics or tracking.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAboutDialog = false }) {
+                    Text("OK")
+                }
+            }
         )
     }
 
