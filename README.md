@@ -115,9 +115,9 @@ Install Node och pnpm - Ubuntu 26.04
 
 2. Setup Java for Ubuntu 26.04
 
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-export PATH="$JAVA_HOME/bin:$PATH"
-java -version
+- export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+- export PATH="$JAVA_HOME/bin:$PATH"
+- java -version
 
 ---------------------
 
