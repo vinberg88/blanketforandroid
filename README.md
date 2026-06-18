@@ -102,21 +102,19 @@ sudo sdkmanager --install "cmdline-tools;latest"
 
 sudo sdkmanager --install "ndk;29.0.14206865"
 
-sudo sdkmanager --install "platforms;android-36.1"
+sudo sdkmanager --install "platforms;android-36"
 
-sudo sdkmanager --install "sources;android-36.1"
+sudo sdkmanager --install "sources;android-36"
 
 sudo sdkmanager --install "android-desktop;x86_64"
 
-sudo sdkmanager --install "system-images;android-35;google_apis;x86_64"
+sudo sdkmanager --install "system-images;android-36;google_apis;x86_64"
 
 sudo sdkmanager --install "build-tools;37.0.0-rc2"
 
-sudo sdkmanager --install "platforms;android-34"
+sudo sdkmanager --install "platforms;android-35"
 
-sudo sdkmanager --install "build-tools;34.0.0"
-
-sudo sdkmanager --install "platforms;android-34"
+sudo sdkmanager --install "build-tools;35.0.0"
 
 -------------------
 
