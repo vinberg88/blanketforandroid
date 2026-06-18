@@ -5,6 +5,30 @@
 UPDATE 2026-06-17 - I have posted BLANKET to play store and are waiting for the green light to publish Blanket
 for all user via GOOGLE. But it take some time.... No stress
 
+## UPDATE 2026-06-18 - Blanket Android mixer refresh
+
+The Android version has been updated to feel closer to the original Blanket desktop app while still being comfortable on a phone.
+
+What changed:
+
+- New Blanket launcher icon for Android install/app drawer.
+- More compact sound mixer layout with 4 sounds per row.
+- Custom line-style icons for Rain, Storm and Waves, inspired by the original Blanket screenshot.
+- Master volume slider in the bottom control bar.
+- Sleep timer with 15, 30 and 60 minute options.
+- Smooth fade in and fade out when sounds start, stop, pause or resume.
+- Imported/custom sounds can now be edited:
+  - rename the sound
+  - choose an icon
+  - delete the sound from the edit dialog
+- Imported sounds still use Android document permissions so they can keep working after app restart.
+- Gradle memory setting was lowered from 2048 MB to 1024 MB to make local builds easier on smaller machines.
+
+Build verification used for this update:
+
+- `./gradlew.bat :app:compileDebugKotlin --no-daemon`
+- `./gradlew.bat assembleDebug --no-daemon`
+
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
