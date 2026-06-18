@@ -13,18 +13,21 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 data class CustomSoundMetadata(
     val id: String,
     val displayName: String,
-    val uriString: String
+    val uriString: String,
+    val iconName: String = "music_note"
 )
 
 class PreferencesRepository(private val context: Context) {
     
     private val IS_PLAYING_KEY = booleanPreferencesKey("is_playing")
+    private val MASTER_VOLUME_KEY = floatPreferencesKey("master_volume")
     private val CUSTOM_SOUND_IDS_KEY = stringSetPreferencesKey("custom_sound_ids")
 
     private fun soundEnabledKey(soundId: String) = booleanPreferencesKey("sound_enabled_$soundId")
     private fun soundVolumeKey(soundId: String) = floatPreferencesKey("sound_volume_$soundId")
     private fun customSoundNameKey(soundId: String) = stringPreferencesKey("custom_sound_name_$soundId")
     private fun customSoundUriKey(soundId: String) = stringPreferencesKey("custom_sound_uri_$soundId")
+    private fun customSoundIconKey(soundId: String) = stringPreferencesKey("custom_sound_icon_$soundId")
 
     val isPlaying: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[IS_PLAYING_KEY] ?: false
@@ -35,8 +38,13 @@ class PreferencesRepository(private val context: Context) {
         ids.mapNotNull { id ->
             val name = preferences[customSoundNameKey(id)] ?: return@mapNotNull null
             val uri = preferences[customSoundUriKey(id)] ?: return@mapNotNull null
-            CustomSoundMetadata(id, name, uri)
+            val icon = preferences[customSoundIconKey(id)] ?: "music_note"
+            CustomSoundMetadata(id, name, uri, icon)
         }
+    }
+
+    val masterVolume: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[MASTER_VOLUME_KEY] ?: 1f
     }
 
     fun getSoundState(soundId: String): Flow<SoundState> = context.dataStore.data.map { preferences ->
@@ -65,6 +73,12 @@ class PreferencesRepository(private val context: Context) {
         }
     }
 
+    suspend fun setMasterVolume(volume: Float) {
+        context.dataStore.edit { preferences ->
+            preferences[MASTER_VOLUME_KEY] = volume.coerceIn(0f, 1f)
+        }
+    }
+
     suspend fun saveCustomSound(metadata: CustomSoundMetadata) {
         context.dataStore.edit { preferences ->
             val currentIds = preferences[CUSTOM_SOUND_IDS_KEY]?.toMutableSet() ?: mutableSetOf()
@@ -72,6 +86,14 @@ class PreferencesRepository(private val context: Context) {
             preferences[CUSTOM_SOUND_IDS_KEY] = currentIds
             preferences[customSoundNameKey(metadata.id)] = metadata.displayName
             preferences[customSoundUriKey(metadata.id)] = metadata.uriString
+            preferences[customSoundIconKey(metadata.id)] = metadata.iconName
+        }
+    }
+
+    suspend fun updateCustomSound(soundId: String, displayName: String, iconName: String) {
+        context.dataStore.edit { preferences ->
+            preferences[customSoundNameKey(soundId)] = displayName
+            preferences[customSoundIconKey(soundId)] = iconName
         }
     }
 
@@ -82,6 +104,7 @@ class PreferencesRepository(private val context: Context) {
             preferences[CUSTOM_SOUND_IDS_KEY] = currentIds
             preferences.remove(customSoundNameKey(soundId))
             preferences.remove(customSoundUriKey(soundId))
+            preferences.remove(customSoundIconKey(soundId))
             preferences.remove(soundEnabledKey(soundId))
             preferences.remove(soundVolumeKey(soundId))
         }
