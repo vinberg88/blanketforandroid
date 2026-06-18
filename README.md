@@ -29,6 +29,25 @@ Build verification used for this update:
 - `./gradlew.bat :app:compileDebugKotlin --no-daemon`
 - `./gradlew.bat assembleDebug --no-daemon`
 
+## UPDATE 2026-06-18 - Play Store launch preparation
+
+The Android project has also been prepared for a Google Play launch.
+
+What changed:
+
+- Android target/compile SDK is now API 35 for current Google Play requirements.
+- Added release signing support through a local `keystore.properties` file.
+- Added Android App Bundle build task for Play Store upload:
+  - `./gradlew :app:buildBlanketReleaseBundle`
+  - output: `dist/blanket.aab`
+- Added an in-app About/Credits dialog with privacy and sound licensing notes.
+- Added [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) for Play Console.
+- Added [`docs/PLAY_STORE_RELEASE.md`](docs/PLAY_STORE_RELEASE.md) with release signing, Data Safety and launch checklist.
+- Added [`docs/play-store/listing.md`](docs/play-store/listing.md) and a 1024 x 500 feature graphic for store listing work.
+- Added `.github/dependabot.yml` so GitHub can open weekly dependency/security update PRs for Gradle and GitHub Actions.
+
+Before uploading to Google Play, create your private upload key locally and add a local `keystore.properties` file. Do not commit the keystore or passwords.
+
 <img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
@@ -135,23 +154,23 @@ sudo sdkmanager --install "cmdline-tools;latest"
 
 sudo sdkmanager --install "ndk;29.0.14206865"
 
-sudo sdkmanager --install "platforms;android-34"
+sudo sdkmanager --install "platforms;android-35"
 
-sudo sdkmanager --install "sources;android-34"
+sudo sdkmanager --install "sources;android-35"
 
 sudo sdkmanager --install "android-desktop;x86_64"
 
-sudo sdkmanager --install "system-images;android-34;google_apis;x86_64"
+sudo sdkmanager --install "system-images;android-35;google_apis;x86_64"
 
 sudo sdkmanager --install "build-tools;37.0.0-rc2"
 
-sudo sdkmanager --install "platforms;android-34"
+sudo sdkmanager --install "platforms;android-35"
 
 sudo sdkmanager --install "build-tools;34.0.0"
 
 sudo sdkmanager --install "build-tools;37.0.0-rc2" "cmake;4.1.2" "cmdline-tools;latest" "ndk;30.0.14904198"
 
-sudo sdkmanager --install "platforms;android-34" "sources;android-34" "system-images;android-34;default;x86_64"
+sudo sdkmanager --install "platforms;android-35" "sources;android-35" "system-images;android-35;default;x86_64"
 
 -------------------
 
@@ -195,10 +214,10 @@ LAST COPY AND PASTE ALL IN TERMINAL FOR UBUNTU 24.04
     fi
 
   yes | "$SDKMANAGER" --licenses
-  "$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+  "$SDKMANAGER" --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-  ls -la "$ANDROID_SDK_ROOT/platforms/android-34"
-  ls -la "$ANDROID_SDK_ROOT/build-tools/34.0.0"
+  ls -la "$ANDROID_SDK_ROOT/platforms/android-35"
+  ls -la "$ANDROID_SDK_ROOT/build-tools/35.0.0"
 
   GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew --stop || true
   GRADLE_USER_HOME=/home/adolf/blanket/.gradle ./gradlew clean :app:buildBlanketInternalApk --stacktrace
@@ -224,7 +243,11 @@ Output: dist/blanket.apk
 Release APK:
 Build: sudo ./gradlew :app:buildBlanketReleaseApk
 Output: dist/blanket.apk
-Note: release signing is not configured by default; for production you should add a real keystore.
+
+Release Android App Bundle for Google Play:
+Build: sudo ./gradlew :app:buildBlanketReleaseBundle
+Output: dist/blanket.aab
+Note: release signing is read from local keystore.properties when configured.
 
 ------------------------------------------
 
@@ -255,7 +278,11 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 - Release APK:
 	- Build: `./gradlew :app:buildBlanketReleaseApk`
 	- Output: `dist/blanket.apk`
-	- Note: release signing is not configured by default; for production you should add a real keystore.
+
+- Release Android App Bundle for Google Play:
+	- Build: `./gradlew :app:buildBlanketReleaseBundle`
+	- Output: `dist/blanket.aab`
+	- Note: release signing is read from local `keystore.properties` when configured.
 
 ### Useful tasks
 - Show signing configs: `./gradlew :app:signingReport`
@@ -266,6 +293,7 @@ This repository is an **Android Studio-ready Gradle project** (Kotlin + Jetpack 
 Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 - **[Build Notes](docs/BUILD_NOTES.md)** - Detailed build instructions, project structure, and features
+- **[Play Store Release](docs/PLAY_STORE_RELEASE.md)** - Google Play checklist, signing, Data Safety, and AAB build notes
 - **[Azure CI/CD](docs/AZURE_CICD.md)** - Azure Pipelines configuration for building APK files
 - **[Implementation Guide](docs/IMPLEMENTATION.md)** - Technical architecture and design decisions
 - **[Testing Guide](docs/TESTING_GUIDE.md)** - Step-by-step testing instructions

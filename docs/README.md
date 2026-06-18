@@ -25,6 +25,12 @@ This directory contains comprehensive documentation for the Blanket for Android 
   - Manual testing procedures
   - Feature testing checklist
 
+- **[PLAY_STORE_RELEASE.md](PLAY_STORE_RELEASE.md)** - Google Play release checklist
+  - Target SDK 35 notes
+  - Privacy Policy and Data Safety guidance
+  - Release signing and Android App Bundle build
+  - Dependabot/security checklist
+
 ### Developer Documentation
 
 - **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Technical architecture and design decisions
@@ -61,6 +67,8 @@ docs/
 ├── BUILD_NOTES.md              # Build instructions
 ├── AZURE_CICD.md               # Azure Pipelines CI/CD
 ├── IMPLEMENTATION.md           # Technical architecture
+├── PLAY_STORE_RELEASE.md       # Google Play launch checklist
+├── play-store/                 # Store listing text and feature graphic
 ├── TESTING_GUIDE.md            # Testing procedures
 ├── UI_DESIGN.md                # Design reference
 ├── SUMMARY.md                  # Implementation summary
@@ -74,9 +82,10 @@ docs/
 1. **New to the project?** Start with [BUILD_NOTES.md](BUILD_NOTES.md)
 2. **Want to build locally?** See [BUILD_NOTES.md](BUILD_NOTES.md) or [TESTING_GUIDE.md](TESTING_GUIDE.md)
 3. **Want to build with Azure?** See [AZURE_CICD.md](AZURE_CICD.md)
-4. **Understanding the code?** Read [IMPLEMENTATION.md](IMPLEMENTATION.md)
-5. **Working on UI?** Check [UI_DESIGN.md](UI_DESIGN.md)
-6. **Contributing?** See [development/PR_OVERVIEW.md](development/PR_OVERVIEW.md)
+4. **Preparing Google Play?** Use [PLAY_STORE_RELEASE.md](PLAY_STORE_RELEASE.md)
+5. **Understanding the code?** Read [IMPLEMENTATION.md](IMPLEMENTATION.md)
+6. **Working on UI?** Check [UI_DESIGN.md](UI_DESIGN.md)
+7. **Contributing?** See [development/PR_OVERVIEW.md](development/PR_OVERVIEW.md)
 
 ## 📖 Related Documentation
 
