@@ -95,7 +95,7 @@ Time to build Android files for Ubuntu 24.04 and  Blanket.
 
 Copy and paste....
 
-sdkmanager --licenses
+sudo sdkmanager --licenses
 
 Press y - All SDK package licenses accepted...
 
