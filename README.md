@@ -1,3 +1,17 @@
+TEST APP HERE. IT WILL BE BETTER BUT FOR NOW SO WE CAN START WORK ON BLANKET.
+
+
+https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10000
+
+Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setData(Uri.parse(
+        "https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10000"));
+intent.setPackage("com.android.vending");
+startActivity(intent);
+
+- Android is a trademark of Google LLC. By Mattias Vinberg for Google PLAY.
+
+
 <meta name="google-site-verification" content="YTE6KNAH688qJUuSz1c7AYMcH7jA3K_T_vonABzvjx8" />
 
 # Blanket for ANDROID - Listen to different sounds and Relax. 
