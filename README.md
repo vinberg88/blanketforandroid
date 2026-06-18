@@ -39,7 +39,7 @@ sudo apt upgrade
 
 Install some programs for Android and Ubuntu.
 
-sudo apt install kotlin gradle bash git wget curl npm jet* cmake* openjdk-17-jdk unzip libc6* zlib1g*
+sudo apt install kotlin gradle bash meson git wget curl npm jet* cmake* openjdk-17-jdk unzip libc6* zlib1g*
 
 -------------------
 
@@ -50,6 +50,12 @@ sudo add-apt-repository ppa:openjdk-r/ppa
 sudo apt-get update
 
 sudo apt-get install openjdk-8-jdk
+
+-------------------
+
+sudo apt install google-android-cmdline-tools-13.0-installer
+
+sudo apt install google-android-platform-34-installer
 
 -------------------
 
@@ -105,19 +111,23 @@ sudo sdkmanager --install "cmdline-tools;latest"
 
 sudo sdkmanager --install "ndk;29.0.14206865"
 
-sudo sdkmanager --install "platforms;android-36"
+sudo sdkmanager --install "platforms;android-34"
 
-sudo sdkmanager --install "sources;android-36"
+sudo sdkmanager --install "sources;android-34"
 
 sudo sdkmanager --install "android-desktop;x86_64"
 
-sudo sdkmanager --install "system-images;android-36;google_apis;x86_64"
+sudo sdkmanager --install "system-images;android-34;google_apis;x86_64"
 
 sudo sdkmanager --install "build-tools;37.0.0-rc2"
 
-sudo sdkmanager --install "platforms;android-35"
+sudo sdkmanager --install "platforms;android-34"
 
-sudo sdkmanager --install "build-tools;35.0.0"
+sudo sdkmanager --install "build-tools;34.0.0"
+
+sudo sdkmanager --install "build-tools;37.0.0-rc2" "cmake;4.1.2" "cmdline-tools;latest" "ndk;30.0.14904198"
+
+sudo sdkmanager --install "platforms;android-34" "sources;android-34" "system-images;android-34;default;x86_64"
 
 -------------------
 
