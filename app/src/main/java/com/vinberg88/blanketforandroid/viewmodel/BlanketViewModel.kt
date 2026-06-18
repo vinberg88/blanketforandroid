@@ -13,6 +13,9 @@ import com.vinberg88.blanketforandroid.data.PreferencesRepository
 import com.vinberg88.blanketforandroid.model.Sound
 import com.vinberg88.blanketforandroid.model.SoundState
 import com.vinberg88.blanketforandroid.model.availableSounds
+import com.vinberg88.blanketforandroid.model.iconForName
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
@@ -27,6 +30,12 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
+    private val _masterVolume = MutableStateFlow(1f)
+    val masterVolume: StateFlow<Float> = _masterVolume.asStateFlow()
+
+    private val _sleepTimerMinutes = MutableStateFlow<Int?>(null)
+    val sleepTimerMinutes: StateFlow<Int?> = _sleepTimerMinutes.asStateFlow()
+
     private val _customSounds = MutableStateFlow<List<Sound>>(emptyList())
     val customSounds: StateFlow<List<Sound>> = _customSounds.asStateFlow()
 
@@ -35,12 +44,20 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         .stateIn(viewModelScope, SharingStarted.Eagerly, availableSounds)
 
     private val hasAutoStarted = AtomicBoolean(false)
+    private var sleepTimerJob: Job? = null
 
     init {
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
                 _isPlaying.value = playing
+            }
+        }
+
+        viewModelScope.launch {
+            prefsRepository.masterVolume.collect { volume ->
+                _masterVolume.value = volume
+                audioPlayer.setMasterVolume(volume)
             }
         }
 
@@ -59,7 +76,8 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                         id = metadata.id,
                         fileName = metadata.uriString,
                         displayName = metadata.displayName,
-                        icon = Icons.Default.MusicNote,
+                        icon = iconForName(metadata.iconName),
+                        iconName = metadata.iconName,
                         isCustom = true
                     )
                     audioPlayer.loadSoundFromUri(sound, Uri.parse(metadata.uriString))
@@ -114,6 +132,12 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun setMasterVolume(volume: Float) {
+        viewModelScope.launch {
+            prefsRepository.setMasterVolume(volume)
+        }
+    }
+
     fun togglePlayPause() {
         viewModelScope.launch {
             val newPlaying = !_isPlaying.value
@@ -126,8 +150,36 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 audioPlayer.resumeAll(enabledSounds)
             } else {
                 audioPlayer.pauseAll()
+                cancelSleepTimer()
             }
         }
+    }
+
+    fun setSleepTimer(minutes: Int) {
+        sleepTimerJob?.cancel()
+        _sleepTimerMinutes.value = minutes
+        sleepTimerJob = viewModelScope.launch {
+            delay(minutes * 60_000L)
+            stopAllSounds()
+        }
+    }
+
+    fun cancelSleepTimer() {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        _sleepTimerMinutes.value = null
+    }
+
+    private suspend fun stopAllSounds() {
+        _soundStates.value.values.forEach { state ->
+            if (state.isEnabled) {
+                prefsRepository.setSoundEnabled(state.soundId, false)
+            }
+        }
+        prefsRepository.setIsPlaying(false)
+        audioPlayer.pauseAll()
+        sleepTimerJob = null
+        _sleepTimerMinutes.value = null
     }
 
     fun addCustomSound(uri: Uri, displayName: String) {
@@ -148,6 +200,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 fileName = uri.toString(),
                 displayName = displayName,
                 icon = Icons.Default.MusicNote,
+                iconName = "music_note",
                 isCustom = true
             )
             audioPlayer.loadSoundFromUri(sound, uri)
@@ -155,10 +208,28 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 CustomSoundMetadata(
                     id = soundId,
                     displayName = displayName,
-                    uriString = uri.toString()
+                    uriString = uri.toString(),
+                    iconName = "music_note"
                 )
             )
             _customSounds.value = _customSounds.value + sound
+        }
+    }
+
+    fun updateCustomSound(soundId: String, displayName: String, iconName: String) {
+        viewModelScope.launch {
+            prefsRepository.updateCustomSound(soundId, displayName, iconName)
+            _customSounds.value = _customSounds.value.map { sound ->
+                if (sound.id == soundId) {
+                    sound.copy(
+                        displayName = displayName,
+                        icon = iconForName(iconName),
+                        iconName = iconName
+                    )
+                } else {
+                    sound
+                }
+            }
         }
     }
 
