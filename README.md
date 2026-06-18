@@ -255,9 +255,9 @@ Note: release signing is read from local keystore.properties when configured.
 
 ------------------------------------------
 
-<img width="670" height="850" alt="INTRO" src="https://github.com/user-attachments/assets/424ae701-45e8-4949-83d9-bb75e88c692b" />
+<img width="870" height="1050" alt="INTRO" src="https://github.com/user-attachments/assets/424ae701-45e8-4949-83d9-bb75e88c692b" />
 
-<img width="670" height="850" alt="FRONT" src="https://github.com/user-attachments/assets/623f3ad2-9bef-4957-9694-1d0ac806aa82" />
+<img width="870" height="1050" alt="FRONT" src="https://github.com/user-attachments/assets/623f3ad2-9bef-4957-9694-1d0ac806aa82" />
 
 
 Android - What it looks like - BLANKET Version 1.0.1
