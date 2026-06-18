@@ -121,19 +121,26 @@ java -version
 
 ---------------------
 
-3. Add to sudo nano ~/.bashrc
+Add to: sudo nano ~/.bashrc
 
 export ANDROID_HOME="$HOME/Android/Sdk"
+
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
+
 export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+
 export ANDROID_HOME=$HOME/Android/Sdk
+
 export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 
-Copy and paste THIS
+Copy and paste THIS to terminal.
 
 source ~/.bashrc
+
 adb version
+
 sdkmanager --version
 
 ---------------------
@@ -161,15 +168,25 @@ Copy and paste....
 sudo yes | sudo sdkmanager --licenses
 
 sdkmanager "platforms;android-37.0"
+
 sdkmanager "build-tools;37.0.0-rc2"
+
 sudo sdkmanager --install "platform-tools;37.0.0"
+
 sudo sdkmanager --install "ndk;r30-beta1"
+
 sudo sdkmanager --install "ndk-bundle;r30-beta1"
+
 sudo sdkmanager --install "emulator;36.6.6"
+
 sudo sdkmanager --install "extras;android;m2repository;47"
+
 sudo sdkmanager --install "tools;26.1.1"
+
 sudo sdkmanager --install "cmdline-tools;latest"
+
 sudo sdkmanager --install "platform-tools"
+
 sudo sdkmanager --install "cmake;4.1.2"
 
 -------------------
@@ -177,6 +194,7 @@ sudo sdkmanager --install "cmake;4.1.2"
 Clone Repo from GitHub - Blanket
 
 git clone https://github.com/vinberg88/blanketforandroid.git blanket
+
 cd blanket
 
 -----------------
