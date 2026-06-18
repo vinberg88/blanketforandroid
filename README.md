@@ -221,29 +221,33 @@ npx expo prebuild --platform android --Clean
 
 Time to build app - Build (command line) so we have an APP. Choose which one suits you...
 
+ONE LAST THING SUDO CHOWN SO WE DONT NEED SUDO =]
+
+- sudo chown -R $USER:$USER ~/blanket ~/.gradle
+
 Copy and Paste: cd /home/adolf/blanket
 
 Debug APK:
 
-Build: sudo ./gradlew :app:buildBlanketApk
+Build: ./gradlew :app:buildBlanketApk 
 
 Output: dist/blanket.apk
 
 Installable APK for testing (debug-signed):
 
-Build: sudo ./gradlew :app:buildBlanketInternalApk
+Build: ./gradlew :app:buildBlanketInternalApk
 
 Output: dist/blanket.apk
 
 Release APK:
 
-Build: sudo ./gradlew :app:buildBlanketReleaseApk
+Build: ./gradlew :app:buildBlanketReleaseApk
 
 Output: dist/blanket.apk
 
 Release Android App Bundle for Google Play:
 
-Build: sudo ./gradlew :app:buildBlanketReleaseBundle
+Build: ./gradlew :app:buildBlanketReleaseBundle
 
 Output: dist/blanket.aab
 
