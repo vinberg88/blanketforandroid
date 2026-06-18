@@ -96,7 +96,7 @@ sudo snap install kotlin --classic
 
 sudo snap install android-studio --Classic
 
-sudo apt install adb google-android-platform-37-installer
+sudo apt install adb google-android-platform-36-installer
 
 -------------------
 
@@ -201,9 +201,9 @@ cd blanket
 
 Build so Ubuntu can find Sdk. Copy and Paste =]
 
-cat > local.properties <<EOF
-sdk.dir=$HOME/Android/Sdk
-EOF
+- cat > local.properties <<EOF
+- sdk.dir=$HOME/Android/Sdk
+- EOF
 
 -----------------
 
@@ -224,20 +224,29 @@ Time to build app - Build (command line) so we have an APP. Choose which one sui
 Copy and Paste: cd /home/adolf/blanket
 
 Debug APK:
+
 Build: sudo ./gradlew :app:buildBlanketApk
+
 Output: dist/blanket.apk
 
 Installable APK for testing (debug-signed):
+
 Build: sudo ./gradlew :app:buildBlanketInternalApk
+
 Output: dist/blanket.apk
 
 Release APK:
+
 Build: sudo ./gradlew :app:buildBlanketReleaseApk
+
 Output: dist/blanket.apk
 
 Release Android App Bundle for Google Play:
+
 Build: sudo ./gradlew :app:buildBlanketReleaseBundle
+
 Output: dist/blanket.aab
+
 Note: release signing is read from local keystore.properties when configured.
 
 ------------------------------------------
