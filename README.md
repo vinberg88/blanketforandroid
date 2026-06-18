@@ -1,16 +1,10 @@
 TEST APP HERE. IT WILL BE BETTER BUT FOR NOW SO WE CAN START WORK ON BLANKET.
 
-
 https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10000
 
-Intent intent = new Intent(Intent.ACTION_VIEW);
-intent.setData(Uri.parse(
-        "https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10000"));
-intent.setPackage("com.android.vending");
-startActivity(intent);
+<a href="https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10000"><img width="200" alt="Download via PlayStore" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"/></a>
 
 - Android is a trademark of Google LLC. By Mattias Vinberg for Google PLAY.
-
 
 <meta name="google-site-verification" content="YTE6KNAH688qJUuSz1c7AYMcH7jA3K_T_vonABzvjx8" />
 
@@ -62,7 +56,7 @@ What changed:
 
 Before uploading to Google Play, create your private upload key locally and add a local `keystore.properties` file. Do not commit the keystore or passwords.
 
-<img width="128" height="128" alt="com rafaelmardojai Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
+<img width="128" height="128" alt="Mattias Vinberg - Blanket" src="https://github.com/user-attachments/assets/3d145fab-7abb-43a1-91b3-88892a24ba9e" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
