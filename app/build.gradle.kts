@@ -1,24 +1,53 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
 
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
+val hasReleaseSigning = listOf(
+    "storeFile",
+    "storePassword",
+    "keyAlias",
+    "keyPassword"
+).all { !keystoreProperties.getProperty(it).isNullOrBlank() }
+
 android {
     namespace = "com.vinberg88.blanketforandroid"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.vinberg88.blanketforandroid"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (hasReleaseSigning) {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -100,6 +129,20 @@ tasks.register<Copy>("buildBlanketReleaseApk") {
     into(rootProject.layout.projectDirectory.dir("dist"))
 
     rename { "blanket.apk" }
+}
+
+// Convenience task: build a Play Store Android App Bundle with a stable filename.
+// Produces: <repo>/dist/blanket.aab
+// Add keystore.properties locally before publishing to create a signed release bundle.
+tasks.register<Copy>("buildBlanketReleaseBundle") {
+    dependsOn("bundleRelease")
+
+    val releaseBundleDir = layout.buildDirectory.dir("outputs/bundle/release")
+    from(releaseBundleDir)
+    include("*.aab")
+
+    into(rootProject.layout.projectDirectory.dir("dist"))
+    rename { "blanket.aab" }
 }
 
 // Convenience task: build an installable (debug-signed) APK with a stable filename.
