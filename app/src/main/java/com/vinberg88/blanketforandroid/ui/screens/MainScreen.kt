@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.vinberg88.blanketforandroid.BuildConfig
 import com.vinberg88.blanketforandroid.ui.components.SoundTile
 import com.vinberg88.blanketforandroid.viewmodel.BlanketViewModel
 
@@ -296,7 +297,7 @@ fun MainScreen(viewModel: BlanketViewModel) {
             title = { Text("About Blanket") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Blanket for Android 1.1.0")
+                    Text("Blanket for Android ${BuildConfig.VERSION_NAME}")
                     Text("Mix ambient sounds for focus, sleep and calm.")
                     Text("Android version by Mattias Vinberg.")
                     Text("Inspired by Blanket by Rafael Mardojai CM and contributors.")
