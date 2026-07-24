@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
@@ -39,6 +41,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -57,7 +61,7 @@ import com.vinberg88.blanketforandroid.ui.components.SoundTile
 import com.vinberg88.blanketforandroid.viewmodel.BlanketViewModel
 
 private val PRESETS = listOf("Default", "Nature", "Focus", "Sleep")
-private val SLEEP_TIMER_OPTIONS = listOf(15, 30, 60)
+private val SLEEP_TIMER_OPTIONS = listOf(5, 15, 30, 45, 60, 90, 120)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +72,9 @@ fun MainScreen(viewModel: BlanketViewModel) {
     val masterVolume by viewModel.masterVolume.collectAsState()
     val selectedPreset by viewModel.selectedPreset.collectAsState()
     val sleepTimerMinutes by viewModel.sleepTimerMinutes.collectAsState()
+    val sleepTimerEndsAt by viewModel.sleepTimerEndsAt.collectAsState()
+    val favoriteSoundIds by viewModel.favoriteSoundIds.collectAsState()
+    val savedMixes by viewModel.savedMixes.collectAsState()
     val context = LocalContext.current
 
     var showPresetMenu by remember { mutableStateOf(false) }
@@ -75,6 +82,16 @@ fun MainScreen(viewModel: BlanketViewModel) {
     var showTimerDialog by remember { mutableStateOf(false) }
     var showMasterVolumeDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showSaveMixDialog by remember { mutableStateOf(false) }
+    var mixName by remember { mutableStateOf("") }
+    var now by remember { mutableStateOf(System.currentTimeMillis()) }
+
+    LaunchedEffect(sleepTimerEndsAt) {
+        while (sleepTimerEndsAt != null) {
+            now = System.currentTimeMillis()
+            kotlinx.coroutines.delay(1_000)
+        }
+    }
 
     val soundPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -124,6 +141,18 @@ fun MainScreen(viewModel: BlanketViewModel) {
                                     }
                                 )
                             }
+                            if (savedMixes.isNotEmpty()) HorizontalDivider()
+                            savedMixes.forEach { mix ->
+                                DropdownMenuItem(
+                                    text = { Text(mix.name) },
+                                    trailingIcon = {
+                                        IconButton(onClick = { viewModel.removeSavedMix(mix) }) {
+                                            Icon(Icons.Default.Delete, contentDescription = "Delete ${mix.name}")
+                                        }
+                                    },
+                                    onClick = { viewModel.applySavedMix(mix); showPresetMenu = false }
+                                )
+                            }
                         }
                     }
                 },
@@ -136,6 +165,15 @@ fun MainScreen(viewModel: BlanketViewModel) {
                             expanded = showOverflowMenu,
                             onDismissRequest = { showOverflowMenu = false }
                         ) {
+                            DropdownMenuItem(
+                                text = { Text("Save current mix") },
+                                leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    mixName = ""
+                                    showSaveMixDialog = true
+                                }
+                            )
                             DropdownMenuItem(
                                 text = { Text("Add custom sound") },
                                 leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
@@ -155,7 +193,7 @@ fun MainScreen(viewModel: BlanketViewModel) {
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        sleepTimerMinutes?.let { "Sleep timer: $it min" }
+                                        sleepTimerEndsAt?.let { "Sleep timer: ${formatRemainingTime(it, now)}" }
                                             ?: "Sleep timer"
                                     )
                                 },
@@ -219,24 +257,24 @@ fun MainScreen(viewModel: BlanketViewModel) {
             }
         }
     ) { paddingValues ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            contentPadding = paddingValues,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp)
-        ) {
-            items(allSounds, key = { it.id }) { sound ->
-                val state = soundStates[sound.id]
-                SoundTile(
-                    soundId = sound.id,
-                    icon = sound.icon,
-                    name = sound.displayName,
-                    isEnabled = state?.isEnabled ?: false,
-                    volume = state?.volume ?: 0.45f,
-                    onToggle = { viewModel.toggleSound(sound.id) },
-                    onVolumeChange = { viewModel.setSoundVolume(sound.id, it) }
-                )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val columns = when { maxWidth >= 840.dp -> 6; maxWidth >= 600.dp -> 5; else -> 4 }
+            val orderedSounds = allSounds.sortedWith(compareByDescending { it.id in favoriteSoundIds }.thenBy { it.displayName })
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columns), contentPadding = paddingValues,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
+            ) {
+                items(orderedSounds, key = { it.id }) { sound ->
+                    val state = soundStates[sound.id]
+                    SoundTile(
+                        soundId = sound.id, icon = sound.icon, name = sound.displayName,
+                        isEnabled = state?.isEnabled ?: false, volume = state?.volume ?: 0.45f,
+                        isFavorite = sound.id in favoriteSoundIds,
+                        onToggle = { viewModel.toggleSound(sound.id) },
+                        onVolumeChange = { viewModel.setSoundVolume(sound.id, it) },
+                        onFavoriteToggle = { viewModel.toggleFavorite(sound.id) }
+                    )
+                }
             }
         }
     }
@@ -291,6 +329,16 @@ fun MainScreen(viewModel: BlanketViewModel) {
         )
     }
 
+    if (showSaveMixDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveMixDialog = false },
+            title = { Text("Save mix") },
+            text = { OutlinedTextField(value = mixName, onValueChange = { mixName = it }, label = { Text("Mix name") }, singleLine = true) },
+            confirmButton = { TextButton(onClick = { viewModel.saveCurrentMix(mixName); showSaveMixDialog = false }) { Text("Save") } },
+            dismissButton = { TextButton(onClick = { showSaveMixDialog = false }) { Text("Cancel") } }
+        )
+    }
+
     if (showAboutDialog) {
         AlertDialog(
             onDismissRequest = { showAboutDialog = false },
@@ -311,4 +359,9 @@ fun MainScreen(viewModel: BlanketViewModel) {
             }
         )
     }
+}
+
+private fun formatRemainingTime(endsAt: Long, now: Long): String {
+    val seconds = ((endsAt - now).coerceAtLeast(0L) + 999) / 1_000
+    return "%d:%02d".format(seconds / 60, seconds % 60)
 }

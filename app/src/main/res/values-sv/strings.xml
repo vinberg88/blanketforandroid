@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Blanket</string>
+    <string name="playback_channel_name">Blanket-uppspelning</string>
+    <string name="playback_notification_title">Blanket spelar</string>
+    <string name="playback_notification_text">Tryck för att återgå till din ljudmix</string>
+    <string name="pause">Pausa</string>
+    <string name="play_pause">Spela / pausa</string>
+</resources>

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -34,6 +35,9 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import com.vinberg88.blanketforandroid.ui.theme.BlueAccent
 import com.vinberg88.blanketforandroid.ui.theme.DarkSurfaceVariant
 import com.vinberg88.blanketforandroid.ui.theme.SelectedSoundBackground
@@ -50,8 +54,10 @@ fun SoundTile(
     name: String,
     isEnabled: Boolean,
     volume: Float,
+    isFavorite: Boolean,
     onToggle: () -> Unit,
     onVolumeChange: (Float) -> Unit,
+    onFavoriteToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -79,7 +85,15 @@ fun SoundTile(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        IconButton(onClick = onFavoriteToggle, modifier = Modifier.size(28.dp)) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                contentDescription = if (isFavorite) "Remove $name from favorites" else "Add $name to favorites",
+                tint = if (isFavorite) BlueAccent else MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = name,
