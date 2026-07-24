@@ -11,8 +11,8 @@ Current project status:
 - `compileSdk = 36`
 - `targetSdk = 36`
 - `applicationId = space.manus.blanket.android.t20260402202534`
-- `versionCode = 10001`
-- `versionName = 1.1.0`
+- `versionCode = 10002`
+- `versionName = 1.1.1`
 - Local SDK requirement: install `platforms;android-36`
 
 Useful install command:
@@ -170,16 +170,20 @@ For local install testing, use the internal APK:
 Play Console can retain the warning **Restricted foreground service types** for
 the older Manus test bundle with `versionCode 10000`.
 
-The native Blanket `versionCode 10001` does not declare:
+The native Blanket `versionCode 10002` does not declare:
 
 - `BOOT_COMPLETED`
 - `RECEIVE_BOOT_COMPLETED`
 - a foreground service
 - a foreground-service permission
 
-Upload and roll out the signed `10001` bundle to the same testing track. If Play
+Upload and roll out the signed `10002` bundle to the same testing track. If Play
 still lists the warning, open **View details > Affected bundles** and confirm
-whether it points to historical bundle `10000` or the new `10001`.
+whether it points to historical bundle `10000` or the new `10002`.
+
+Google Play never accepts a reused `versionCode`. If a bundle was already added
+to App bundle explorer or a draft release, increase the code and build a new
+signed AAB rather than reusing the previous artifact.
 
 ## 7. In-App About and Credits
 
