@@ -2,6 +2,7 @@ package com.vinberg88.blanketforandroid.viewmodel
 
 import android.app.Application
 import android.content.Intent
+import androidx.core.content.ContextCompat
 import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
@@ -10,10 +11,13 @@ import androidx.lifecycle.viewModelScope
 import com.vinberg88.blanketforandroid.audio.AudioPlayer
 import com.vinberg88.blanketforandroid.data.CustomSoundMetadata
 import com.vinberg88.blanketforandroid.data.PreferencesRepository
+import com.vinberg88.blanketforandroid.data.SavedMix
 import com.vinberg88.blanketforandroid.model.Sound
 import com.vinberg88.blanketforandroid.model.SoundState
 import com.vinberg88.blanketforandroid.model.availableSounds
 import com.vinberg88.blanketforandroid.model.iconForName
+import com.vinberg88.blanketforandroid.playback.PlaybackController
+import com.vinberg88.blanketforandroid.playback.PlaybackForegroundService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -42,6 +46,14 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private val _sleepTimerMinutes = MutableStateFlow<Int?>(null)
     val sleepTimerMinutes: StateFlow<Int?> = _sleepTimerMinutes.asStateFlow()
 
+    private val _sleepTimerEndsAt = MutableStateFlow<Long?>(null)
+    val sleepTimerEndsAt: StateFlow<Long?> = _sleepTimerEndsAt.asStateFlow()
+
+    val favoriteSoundIds: StateFlow<Set<String>> = prefsRepository.favoriteSoundIds
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+    val savedMixes: StateFlow<List<SavedMix>> = prefsRepository.savedMixes
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     private val _customSounds = MutableStateFlow<List<Sound>>(emptyList())
     val customSounds: StateFlow<List<Sound>> = _customSounds.asStateFlow()
 
@@ -53,6 +65,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private var sleepTimerJob: Job? = null
 
     init {
+        PlaybackController.onTogglePlayback = ::togglePlayPause
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
@@ -182,6 +195,40 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun applySavedMix(mix: SavedMix) {
+        _selectedPreset.value = mix.name
+        viewModelScope.launch {
+            allSounds.value.forEach { sound ->
+                val enabled = sound.id in mix.soundIds
+                val volume = mix.volumes[sound.id] ?: 0.45f
+                prefsRepository.setSoundEnabled(sound.id, enabled)
+                prefsRepository.setSoundVolume(sound.id, volume)
+                audioPlayer.setVolume(sound.id, volume)
+                if (_isPlaying.value && enabled) audioPlayer.play(sound.id) else audioPlayer.pause(sound.id)
+            }
+        }
+    }
+
+    fun saveCurrentMix(name: String) {
+        val cleanName = name.trim().take(40)
+        if (cleanName.isEmpty()) return
+        val states = _soundStates.value
+        val enabled = states.values.filter { it.isEnabled }.map { it.soundId }.toSet()
+        val volumes = states.mapValues { it.value.volume }
+        viewModelScope.launch {
+            prefsRepository.saveMix(SavedMix("mix_${java.util.UUID.randomUUID()}", cleanName, enabled, volumes))
+            _selectedPreset.value = cleanName
+        }
+    }
+
+    fun removeSavedMix(mix: SavedMix) {
+        viewModelScope.launch { prefsRepository.removeMix(mix) }
+    }
+
+    fun toggleFavorite(soundId: String) {
+        viewModelScope.launch { prefsRepository.toggleFavorite(soundId) }
+    }
+
     fun togglePlayPause() {
         viewModelScope.launch {
             val newPlaying = !_isPlaying.value
@@ -192,9 +239,13 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                     .filter { it.value.isEnabled }
                     .keys
                 audioPlayer.resumeAll(enabledSounds)
+                ContextCompat.startForegroundService(
+                    getApplication(), Intent(getApplication(), PlaybackForegroundService::class.java)
+                )
             } else {
                 audioPlayer.pauseAll()
                 cancelSleepTimer()
+                getApplication<Application>().stopService(Intent(getApplication(), PlaybackForegroundService::class.java))
             }
         }
     }
@@ -202,9 +253,11 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     fun setSleepTimer(minutes: Int) {
         sleepTimerJob?.cancel()
         _sleepTimerMinutes.value = minutes
+        _sleepTimerEndsAt.value = System.currentTimeMillis() + minutes * 60_000L
         sleepTimerJob = viewModelScope.launch {
-            delay(minutes * 60_000L)
-            stopAllSounds()
+            val fadeDurationMs = 30_000L
+            if (minutes * 60_000L > fadeDurationMs) delay(minutes * 60_000L - fadeDurationMs)
+            fadeOutAndStop(fadeDurationMs)
         }
     }
 
@@ -212,6 +265,19 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         sleepTimerJob?.cancel()
         sleepTimerJob = null
         _sleepTimerMinutes.value = null
+        _sleepTimerEndsAt.value = null
+    }
+
+    private suspend fun fadeOutAndStop(durationMs: Long) {
+        val originalMasterVolume = _masterVolume.value
+        val steps = 15
+        repeat(steps) { step ->
+            val progress = (step + 1).toFloat() / steps
+            audioPlayer.setMasterVolume(originalMasterVolume * (1f - progress))
+            delay(durationMs / steps)
+        }
+        audioPlayer.setMasterVolume(originalMasterVolume)
+        stopAllSounds()
     }
 
     private suspend fun stopAllSounds() {
@@ -222,8 +288,10 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         }
         prefsRepository.setIsPlaying(false)
         audioPlayer.pauseAll()
+        getApplication<Application>().stopService(Intent(getApplication(), PlaybackForegroundService::class.java))
         sleepTimerJob = null
         _sleepTimerMinutes.value = null
+        _sleepTimerEndsAt.value = null
     }
 
     fun addCustomSound(uri: Uri, displayName: String) {
@@ -288,6 +356,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     override fun onCleared() {
         super.onCleared()
+        PlaybackController.onTogglePlayback = null
         audioPlayer.release()
     }
 }

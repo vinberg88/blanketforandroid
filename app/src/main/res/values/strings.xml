@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Blanket</string>
+    <string name="playback_channel_name">Blanket playback</string>
+    <string name="playback_notification_title">Blanket is playing</string>
+    <string name="playback_notification_text">Tap to return to your ambient mix</string>
+    <string name="pause">Pause</string>
+    <string name="play_pause">Play / pause</string>
 </resources>
