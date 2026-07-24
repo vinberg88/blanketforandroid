@@ -11,12 +11,21 @@ val keystoreProperties = Properties().apply {
         keystorePropertiesFile.inputStream().use { load(it) }
     }
 }
+
+fun signingSetting(propertyName: String, environmentName: String): String? =
+    keystoreProperties.getProperty(propertyName)?.takeIf { it.isNotBlank() }
+        ?: providers.environmentVariable(environmentName).orNull?.takeIf { it.isNotBlank() }
+
+val releaseStoreFile = signingSetting("storeFile", "BLANKET_KEYSTORE_FILE")
+val releaseStorePassword = signingSetting("storePassword", "BLANKET_KEYSTORE_PASSWORD")
+val releaseKeyAlias = signingSetting("keyAlias", "BLANKET_KEY_ALIAS")
+val releaseKeyPassword = signingSetting("keyPassword", "BLANKET_KEY_PASSWORD")
 val hasReleaseSigning = listOf(
-    "storeFile",
-    "storePassword",
-    "keyAlias",
-    "keyPassword"
-).all { !keystoreProperties.getProperty(it).isNullOrBlank() }
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.vinberg88.blanketforandroid"
@@ -35,10 +44,10 @@ android {
     signingConfigs {
         create("release") {
             if (hasReleaseSigning) {
-                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
-                storePassword = keystoreProperties.getProperty("storePassword")
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = rootProject.file(requireNotNull(releaseStoreFile))
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
             }
         }
     }
