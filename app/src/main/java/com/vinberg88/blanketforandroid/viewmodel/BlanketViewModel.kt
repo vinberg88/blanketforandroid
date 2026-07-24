@@ -231,17 +231,6 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         PlaybackController.togglePlayback(getApplication())
     }
 
-    private fun startPlayback(states: Collection<SoundState>) {
-        val enabledSounds = states.filter { it.isEnabled }
-        enabledSounds.forEach { state ->
-            audioPlayer.setVolume(state.soundId, state.volume)
-        }
-        audioPlayer.resumeAll(enabledSounds.map { it.soundId }.toSet())
-        ContextCompat.startForegroundService(
-            getApplication(), Intent(getApplication(), PlaybackForegroundService::class.java)
-        )
-    }
-
     fun setSleepTimer(minutes: Int) {
         sleepTimerJob?.cancel()
         _sleepTimerMinutes.value = minutes
