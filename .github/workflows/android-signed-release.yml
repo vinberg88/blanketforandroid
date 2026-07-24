@@ -43,7 +43,7 @@ jobs:
           BLANKET_KEY_PASSWORD: ${{ secrets.BLANKET_KEY_PASSWORD }}
         shell: bash
         run: |
-          missing=()
+          declare -a missing=()
           for name in \
             BLANKET_UPLOAD_KEYSTORE_BASE64 \
             BLANKET_KEYSTORE_PASSWORD \
