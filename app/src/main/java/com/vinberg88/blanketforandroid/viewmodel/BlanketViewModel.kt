@@ -61,9 +61,6 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private var sleepTimerJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            PlaybackController.initialize(getApplication())
-        }
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
@@ -77,7 +74,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 if (volume > 0.01f) {
                     lastAudibleMasterVolume = volume
                 }
-                PlaybackController.setMasterVolume(volume)
+                PlaybackController.setMasterVolume(getApplication(), volume)
             }
         }
 
@@ -255,11 +252,14 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         try {
             repeat(steps) { step ->
                 val progress = (step + 1).toFloat() / steps
-                PlaybackController.setMasterVolume(originalMasterVolume * (1f - progress))
+                PlaybackController.setMasterVolume(
+                    getApplication(),
+                    originalMasterVolume * (1f - progress)
+                )
                 delay(durationMs / steps)
             }
         } finally {
-            PlaybackController.setMasterVolume(originalMasterVolume)
+            PlaybackController.setMasterVolume(getApplication(), originalMasterVolume)
         }
         stopAllSounds()
     }
@@ -271,8 +271,8 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         prefsRepository.setIsPlaying(false)
-        PlaybackController.pauseAll()
-        PlaybackController.stopForegroundService()
+        PlaybackController.pauseAll(getApplication())
+        PlaybackController.stopForegroundService(getApplication())
         sleepTimerJob = null
         _sleepTimerMinutes.value = null
         _sleepTimerEndsAt.value = null
@@ -333,7 +333,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     fun removeCustomSound(soundId: String) {
         viewModelScope.launch {
-            PlaybackController.releaseSound(soundId)
+            PlaybackController.releaseSound(getApplication(), soundId)
             prefsRepository.removeCustomSound(soundId)
             _customSounds.value = _customSounds.value.filter { it.id != soundId }
         }

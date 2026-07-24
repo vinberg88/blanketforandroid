@@ -11,6 +11,7 @@ import com.vinberg88.blanketforandroid.model.SoundState
 import com.vinberg88.blanketforandroid.model.availableSounds
 import com.vinberg88.blanketforandroid.model.iconForName
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -22,68 +23,48 @@ object PlaybackController {
     private var audioPlayer: AudioPlayer? = null
 
     suspend fun initialize(context: Context) {
-        if (audioPlayer != null) return
-
-        initMutex.withLock {
-            if (audioPlayer != null) return
-
-            val applicationContext = context.applicationContext
-            val player = AudioPlayer(applicationContext)
-            availableSounds.forEach { sound ->
-                player.loadSound(sound)
-            }
-
-            val repository = PreferencesRepository(applicationContext)
-            player.setMasterVolume(repository.masterVolume.first())
-
-            appContext = applicationContext
-            prefsRepository = repository
-            audioPlayer = player
-        }
+        withInitializedController(context) { _, _, _ -> }
     }
 
     suspend fun startPlayback(context: Context, soundStates: Map<String, SoundState>? = null) {
-        initialize(context)
+        withInitializedController(context) { applicationContext, repository, player ->
+            player.setMasterVolume(repository.masterVolume.first())
+            ensureCustomSoundsLoaded(repository, player)
 
-        val repository = requireNotNull(prefsRepository)
-        val player = requireNotNull(audioPlayer)
-        player.setMasterVolume(repository.masterVolume.first())
-        ensureCustomSoundsLoaded(repository, player)
-
-        val states = soundStates ?: loadPersistedSoundStates(repository)
-        states.values.forEach { state ->
-            player.setVolume(state.soundId, state.volume)
-            if (state.isEnabled) {
-                player.play(state.soundId)
-            } else {
-                player.pause(state.soundId)
+            val states = soundStates ?: loadPersistedSoundStates(repository)
+            states.values.forEach { state ->
+                player.setVolume(state.soundId, state.volume)
+                if (state.isEnabled) {
+                    player.play(state.soundId)
+                } else {
+                    player.pause(state.soundId)
+                }
             }
-        }
 
-        ContextCompat.startForegroundService(
-            requireNotNull(appContext),
-            Intent(requireNotNull(appContext), PlaybackForegroundService::class.java)
-        )
+            ContextCompat.startForegroundService(
+                applicationContext,
+                Intent(applicationContext, PlaybackForegroundService::class.java)
+            )
+        }
     }
 
     suspend fun togglePlayback(
         context: Context,
         soundStates: Map<String, SoundState>? = null
     ): Boolean {
-        initialize(context)
+        return withInitializedController(context) { applicationContext, repository, player ->
+            val newPlaying = !repository.isPlaying.first()
+            repository.setIsPlaying(newPlaying)
 
-        val repository = requireNotNull(prefsRepository)
-        val newPlaying = !repository.isPlaying.first()
-        repository.setIsPlaying(newPlaying)
+            if (newPlaying) {
+                startPlaybackLocked(applicationContext, repository, player, soundStates)
+            } else {
+                player.pauseAll()
+                applicationContext.stopService(Intent(applicationContext, PlaybackForegroundService::class.java))
+            }
 
-        if (newPlaying) {
-            startPlayback(context, soundStates)
-        } else {
-            audioPlayer?.pauseAll()
-            stopForegroundService()
+            newPlaying
         }
-
-        return newPlaying
     }
 
     suspend fun syncSoundState(
@@ -93,63 +74,71 @@ object PlaybackController {
         volume: Float,
         isPlaying: Boolean
     ) {
-        initialize(context)
+        withInitializedController(context) { _, repository, player ->
+            ensureCustomSoundsLoaded(repository, player)
 
-        val repository = requireNotNull(prefsRepository)
-        val player = requireNotNull(audioPlayer)
-        ensureCustomSoundsLoaded(repository, player)
-
-        player.setVolume(soundId, volume)
-        if (isPlaying) {
-            if (isEnabled) {
-                player.play(soundId)
-            } else {
-                player.pause(soundId)
+            player.setVolume(soundId, volume)
+            if (isPlaying) {
+                if (isEnabled) {
+                    player.play(soundId)
+                } else {
+                    player.pause(soundId)
+                }
             }
         }
     }
 
     suspend fun updateSoundVolume(context: Context, soundId: String, volume: Float) {
-        initialize(context)
-
-        val repository = requireNotNull(prefsRepository)
-        val player = requireNotNull(audioPlayer)
-        ensureCustomSoundsLoaded(repository, player)
-        player.setVolume(soundId, volume)
+        withInitializedController(context) { _, repository, player ->
+            ensureCustomSoundsLoaded(repository, player)
+            player.setVolume(soundId, volume)
+        }
     }
 
     suspend fun loadCustomSound(context: Context, sound: Sound, uri: Uri): Boolean {
-        initialize(context)
-
-        val player = requireNotNull(audioPlayer)
-        player.loadSoundFromUri(sound, uri)
-        return player.hasSound(sound.id)
+        return withInitializedController(context) { _, _, player ->
+            player.loadSoundFromUri(sound, uri)
+            player.hasSound(sound.id)
+        }
     }
 
-    fun releaseSound(soundId: String) {
-        audioPlayer?.releaseSound(soundId)
+    suspend fun releaseSound(context: Context, soundId: String) {
+        withInitializedController(context) { _, _, player ->
+            player.releaseSound(soundId)
+        }
     }
 
-    fun pauseAll() {
-        audioPlayer?.pauseAll()
+    suspend fun pauseAll(context: Context) {
+        withInitializedController(context) { _, _, player ->
+            player.pauseAll()
+        }
     }
 
-    fun setMasterVolume(volume: Float) {
-        audioPlayer?.setMasterVolume(volume)
+    suspend fun setMasterVolume(context: Context, volume: Float) {
+        withInitializedController(context) { _, _, player ->
+            player.setMasterVolume(volume)
+        }
     }
 
     fun releaseIfNotPlaying(isPlaying: Boolean) {
         if (!isPlaying) {
-            audioPlayer?.release()
-            audioPlayer = null
-            prefsRepository = null
-            appContext = null
+            runBlocking {
+                initMutex.withLock {
+                    audioPlayer?.release()
+                    audioPlayer = null
+                    prefsRepository = null
+                    appContext = null
+                }
+            }
         }
     }
 
-    fun stopForegroundService() {
-        val context = appContext ?: return
-        context.stopService(Intent(context, PlaybackForegroundService::class.java))
+    suspend fun stopForegroundService(context: Context) {
+        withInitializedController(context) { applicationContext, _, _ ->
+            applicationContext.stopService(
+                Intent(applicationContext, PlaybackForegroundService::class.java)
+            )
+        }
     }
 
     private suspend fun ensureCustomSoundsLoaded(
@@ -180,5 +169,56 @@ object PlaybackController {
         return soundIds.associateWith { soundId ->
             repository.getSoundState(soundId).first()
         }
+    }
+
+    private suspend fun startPlaybackLocked(
+        applicationContext: Context,
+        repository: PreferencesRepository,
+        player: AudioPlayer,
+        soundStates: Map<String, SoundState>? = null
+    ) {
+        player.setMasterVolume(repository.masterVolume.first())
+        ensureCustomSoundsLoaded(repository, player)
+
+        val states = soundStates ?: loadPersistedSoundStates(repository)
+        states.values.forEach { state ->
+            player.setVolume(state.soundId, state.volume)
+            if (state.isEnabled) {
+                player.play(state.soundId)
+            } else {
+                player.pause(state.soundId)
+            }
+        }
+
+        ContextCompat.startForegroundService(
+            applicationContext,
+            Intent(applicationContext, PlaybackForegroundService::class.java)
+        )
+    }
+
+    private suspend fun <T> withInitializedController(
+        context: Context,
+        block: suspend (Context, PreferencesRepository, AudioPlayer) -> T
+    ): T = initMutex.withLock {
+        if (audioPlayer == null || prefsRepository == null || appContext == null) {
+            val applicationContext = context.applicationContext
+            val player = AudioPlayer(applicationContext)
+            availableSounds.forEach { sound ->
+                player.loadSound(sound)
+            }
+
+            val repository = PreferencesRepository(applicationContext)
+            player.setMasterVolume(repository.masterVolume.first())
+
+            appContext = applicationContext
+            prefsRepository = repository
+            audioPlayer = player
+        }
+
+        block(
+            requireNotNull(appContext),
+            requireNotNull(prefsRepository),
+            requireNotNull(audioPlayer)
+        )
     }
 }

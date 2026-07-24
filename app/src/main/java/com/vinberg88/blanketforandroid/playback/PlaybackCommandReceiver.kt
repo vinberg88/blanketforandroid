@@ -12,7 +12,7 @@ class PlaybackCommandReceiver : BroadcastReceiver() {
         if (intent.action != PlaybackForegroundService.ACTION_TOGGLE) return
 
         val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.Main.immediate).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 PlaybackController.togglePlayback(context)
             } finally {
