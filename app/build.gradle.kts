@@ -20,7 +20,7 @@ val hasReleaseSigning = listOf(
 
 android {
     namespace = "com.vinberg88.blanketforandroid"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "space.manus.blanket.android.t20260402202534"
