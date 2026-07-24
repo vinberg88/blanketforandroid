@@ -140,7 +140,9 @@ Create the Base64 value in Windows PowerShell:
 After the secrets are configured, open **Actions > Signed Play release > Run
 workflow**. The workflow restores the private key only inside the temporary
 GitHub runner, builds `dist/blanket.aab`, verifies its signature, and publishes
-the `blanket-signed-play-aab` artifact. The signed-release workflow is manual so
+the `blanket-signed-play-aab` artifact. If any signing secret is missing, the
+workflow now reports which secrets need to be added and skips the signed bundle
+steps instead of failing immediately. The signed-release workflow is manual so
 release secrets are not exposed to normal pull-request builds.
 
 ## 5. Build Android App Bundle
