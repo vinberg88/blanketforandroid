@@ -1,17 +1,46 @@
 package com.vinberg88.blanketforandroid.ui.screens
 
+import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,27 +49,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import android.provider.OpenableColumns
-import com.vinberg88.blanketforandroid.model.Sound
-import com.vinberg88.blanketforandroid.model.iconForName
 import com.vinberg88.blanketforandroid.ui.components.SoundTile
-import com.vinberg88.blanketforandroid.ui.theme.DarkSurfaceVariant
 import com.vinberg88.blanketforandroid.viewmodel.BlanketViewModel
 
-private val BOTTOM_BAR_HEIGHT = 72.dp
-private val PLAY_BUTTON_SIZE = 46.dp
-private val PLAY_ICON_SIZE = 28.dp
-private val HORIZONTAL_PADDING = 4.dp
-private val ADD_TILE_ICON_SIZE = 68.dp
-private val ADD_TILE_ICON_INNER_SIZE = 32.dp
-private val ADD_TILE_NAME_HEIGHT = 32.dp
-private val ADD_TILE_PADDING = 4.dp
-private val ADD_TILE_SPACING = 5.dp
-private val CUSTOM_ICON_OPTIONS = listOf("music_note", "library_music", "audiotrack", "graphic_eq", "radio", "headphones")
+private val PRESETS = listOf("Default", "Nature", "Focus", "Sleep")
 private val SLEEP_TIMER_OPTIONS = listOf(15, 30, 60)
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,13 +65,15 @@ fun MainScreen(viewModel: BlanketViewModel) {
     val isPlaying by viewModel.isPlaying.collectAsState()
     val allSounds by viewModel.allSounds.collectAsState()
     val masterVolume by viewModel.masterVolume.collectAsState()
+    val selectedPreset by viewModel.selectedPreset.collectAsState()
     val sleepTimerMinutes by viewModel.sleepTimerMinutes.collectAsState()
     val context = LocalContext.current
+
+    var showPresetMenu by remember { mutableStateOf(false) }
+    var showOverflowMenu by remember { mutableStateOf(false) }
     var showTimerDialog by remember { mutableStateOf(false) }
+    var showMasterVolumeDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
-    var editingSound by remember { mutableStateOf<Sound?>(null) }
-    var editName by remember { mutableStateOf("") }
-    var editIconName by remember { mutableStateOf("music_note") }
 
     val soundPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -66,11 +83,11 @@ fun MainScreen(viewModel: BlanketViewModel) {
                 uri, null, null, null, null
             )?.use { cursor ->
                 val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (nameIndex >= 0 && cursor.moveToFirst()) {
-                    cursor.getString(nameIndex)
-                        .replace(Regex("\\.(mp3|wav|ogg|m4a|flac|aac)$", RegexOption.IGNORE_CASE), "")
-                } else null
-            } ?: "Custom Sound"
+                if (nameIndex >= 0 && cursor.moveToFirst()) cursor.getString(nameIndex) else null
+            }?.replace(
+                Regex("\\.(mp3|wav|ogg|m4a|flac|aac)$", RegexOption.IGNORE_CASE),
+                ""
+            ) ?: "Custom Sound"
             viewModel.addCustomSound(uri, displayName)
         }
     }
@@ -78,7 +95,87 @@ fun MainScreen(viewModel: BlanketViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Blanket") },
+                title = {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "Blanket",
+                            modifier = Modifier.align(Alignment.Center),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                },
+                navigationIcon = {
+                    Box {
+                        TextButton(onClick = { showPresetMenu = true }) {
+                            Text(selectedPreset, color = MaterialTheme.colorScheme.onSurface)
+                            Text("⌄", modifier = Modifier.padding(start = 5.dp))
+                        }
+                        DropdownMenu(
+                            expanded = showPresetMenu,
+                            onDismissRequest = { showPresetMenu = false }
+                        ) {
+                            PRESETS.forEach { preset ->
+                                DropdownMenuItem(
+                                    text = { Text(preset) },
+                                    onClick = {
+                                        viewModel.applyPreset(preset)
+                                        showPresetMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                },
+                actions = {
+                    Box {
+                        IconButton(onClick = { showOverflowMenu = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "Open menu")
+                        }
+                        DropdownMenu(
+                            expanded = showOverflowMenu,
+                            onDismissRequest = { showOverflowMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Add custom sound") },
+                                leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    soundPickerLauncher.launch(arrayOf("audio/*"))
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Master volume") },
+                                leadingIcon = { Icon(Icons.Default.VolumeUp, contentDescription = null) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    showMasterVolumeDialog = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        sleepTimerMinutes?.let { "Sleep timer: $it min" }
+                                            ?: "Sleep timer"
+                                    )
+                                },
+                                leadingIcon = { Icon(Icons.Default.Timer, contentDescription = null) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    showTimerDialog = true
+                                }
+                            )
+                            HorizontalDivider()
+                            DropdownMenuItem(
+                                text = { Text("About Blanket") },
+                                leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    showAboutDialog = true
+                                }
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
@@ -89,56 +186,33 @@ fun MainScreen(viewModel: BlanketViewModel) {
             BottomAppBar(
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.height(BOTTOM_BAR_HEIGHT)
+                modifier = Modifier.height(64.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.VolumeUp,
-                        contentDescription = "Master volume",
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Slider(
-                        value = masterVolume,
-                        onValueChange = { viewModel.setMasterVolume(it) },
-                        modifier = Modifier.width(104.dp),
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    IconButton(onClick = viewModel::toggleMasterMute) {
+                        Icon(
+                            imageVector = if (masterVolume <= 0.01f) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
+                            contentDescription = if (masterVolume <= 0.01f) "Unmute" else "Mute"
                         )
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
+                    }
 
                     FilledIconButton(
-                        onClick = { viewModel.togglePlayPause() },
-                        modifier = Modifier.size(PLAY_BUTTON_SIZE)
+                        onClick = viewModel::togglePlayPause,
+                        modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
                             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pause" else "Play",
-                            modifier = Modifier.size(PLAY_ICON_SIZE)
+                            contentDescription = if (isPlaying) "Pause all sounds" else "Play selected sounds",
+                            modifier = Modifier.size(28.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    IconButton(onClick = { showTimerDialog = true }) {
-                        Icon(
-                            imageVector = if (sleepTimerMinutes == null) Icons.Default.Timer else Icons.Default.TimerOff,
-                            contentDescription = "Sleep timer"
-                        )
-                    }
-
-                    IconButton(onClick = { showAboutDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "About Blanket"
-                        )
+                    IconButton(onClick = { showOverflowMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Open controls")
                     }
                 }
             }
@@ -149,71 +223,43 @@ fun MainScreen(viewModel: BlanketViewModel) {
             contentPadding = paddingValues,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = HORIZONTAL_PADDING)
+                .padding(horizontal = 8.dp)
         ) {
-            items(allSounds) { sound ->
+            items(allSounds, key = { it.id }) { sound ->
                 val state = soundStates[sound.id]
                 SoundTile(
                     soundId = sound.id,
                     icon = sound.icon,
                     name = sound.displayName,
                     isEnabled = state?.isEnabled ?: false,
-                    volume = state?.volume ?: 0.5f,
+                    volume = state?.volume ?: 0.45f,
                     onToggle = { viewModel.toggleSound(sound.id) },
-                    onVolumeChange = { volume -> viewModel.setSoundVolume(sound.id, volume) },
-                    onEdit = if (sound.isCustom) {
-                        {
-                            editingSound = sound
-                            editName = sound.displayName
-                            editIconName = sound.iconName.ifBlank { "music_note" }
-                        }
-                    } else null
+                    onVolumeChange = { viewModel.setSoundVolume(sound.id, it) }
                 )
             }
-
-            // "Add Sound" tile
-            item {
-                Column(
-                    modifier = Modifier.padding(ADD_TILE_PADDING),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(ADD_TILE_ICON_SIZE)
-                            .clip(CircleShape)
-                            .background(DarkSurfaceVariant)
-                            .clickable {
-                                soundPickerLauncher.launch(arrayOf("audio/*"))
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Sound",
-                            modifier = Modifier.size(ADD_TILE_ICON_INNER_SIZE),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(ADD_TILE_SPACING))
-
-                    Text(
-                        text = "Add Sound",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        modifier = Modifier.height(ADD_TILE_NAME_HEIGHT)
-                    )
-                }
-            }
         }
+    }
+
+    if (showMasterVolumeDialog) {
+        AlertDialog(
+            onDismissRequest = { showMasterVolumeDialog = false },
+            title = { Text("Master volume") },
+            text = {
+                Column {
+                    Text("${(masterVolume * 100).toInt()}%")
+                    Slider(value = masterVolume, onValueChange = viewModel::setMasterVolume)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showMasterVolumeDialog = false }) { Text("Done") }
+            }
+        )
     }
 
     if (showTimerDialog) {
         AlertDialog(
             onDismissRequest = { showTimerDialog = false },
-            title = { Text("Sleep Timer") },
+            title = { Text("Sleep timer") },
             text = {
                 Column {
                     SLEEP_TIMER_OPTIONS.forEach { minutes ->
@@ -250,86 +296,17 @@ fun MainScreen(viewModel: BlanketViewModel) {
             title = { Text("About Blanket") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Blanket for Android 1.0")
-                    Text("Ambient sounds for focus, sleep and calm.")
+                    Text("Blanket for Android 1.1.0")
+                    Text("Mix ambient sounds for focus, sleep and calm.")
                     Text("Android version by Mattias Vinberg.")
-                    Text("Inspired by the original Blanket app by Rafael Mardojai CM and contributors.")
-                    Text("Built-in sounds keep their original licenses. Imported sounds stay on this device.")
+                    Text("Inspired by Blanket by Rafael Mardojai CM and contributors.")
+                    Text("Sound credits: alex36917, Digifish music, felix.blume, Luftrum, gluckose, kvgarlic, Lisa Redfern, SDLx, Falcet, gezortenplotz, stephan, ezwa, Jorge Stolfi and Omegatron.")
+                    Text("Licenses: CC BY, CC BY-SA, CC0 and public domain. Full source links are in SOUNDS_LICENSING.md.")
                     Text("No ads, accounts, analytics or tracking.")
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showAboutDialog = false }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
-
-    editingSound?.let { sound ->
-        AlertDialog(
-            onDismissRequest = { editingSound = null },
-            title = { Text("Edit Sound") },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = editName,
-                        onValueChange = { editName = it },
-                        label = { Text("Name") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        CUSTOM_ICON_OPTIONS.forEach { iconName ->
-                            FilterChip(
-                                selected = editIconName == iconName,
-                                onClick = { editIconName = iconName },
-                                label = {
-                                    Icon(
-                                        imageVector = iconForName(iconName),
-                                        contentDescription = iconName,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.updateCustomSound(
-                            sound.id,
-                            editName.ifBlank { sound.displayName },
-                            editIconName
-                        )
-                        editingSound = null
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-            dismissButton = {
-                Row {
-                    TextButton(
-                        onClick = {
-                            viewModel.removeCustomSound(sound.id)
-                            editingSound = null
-                        }
-                    ) {
-                        Text("Delete")
-                    }
-                    TextButton(onClick = { editingSound = null }) {
-                        Text("Cancel")
-                    }
-                }
+                TextButton(onClick = { showAboutDialog = false }) { Text("OK") }
             }
         )
     }

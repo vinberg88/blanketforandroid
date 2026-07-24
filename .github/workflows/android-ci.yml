@@ -1,0 +1,56 @@
+name: Android CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, codex/play-store-ready-redesign]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 16 SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Verify and build
+        run: ./gradlew lintDebug testDebugUnitTest assembleInternal bundleRelease --stacktrace
+
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: blanket-internal-apk
+          path: app/build/outputs/apk/internal/*.apk
+          if-no-files-found: error
+
+      - name: Upload Play bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: blanket-release-aab
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error

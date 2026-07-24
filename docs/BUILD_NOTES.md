@@ -26,7 +26,7 @@ This is an Android Studio-ready Gradle project with full Blanket audio mixer imp
 ✅ Multi-track audio playback with MediaPlayer
 ✅ Per-sound volume control and looping
 ✅ Master volume, sleep timer, and fade in/out
-✅ Local imported custom sounds with edit/delete support
+✅ Local custom sound import through Android's document picker
 ✅ Play Store Android App Bundle task
 ✅ State persistence with DataStore
 ✅ Auto-restore last mix on app launch
@@ -95,10 +95,10 @@ com.vinberg88.blanketforandroid/
 - **Sound Tiles**: Each tile includes:
   - Circular icon area (blue when active, dark when inactive)
   - Material icon placeholder for each sound
-  - Sound display name (e.g., "Coffee Shop", "New York City")
+  - Sound display name (e.g., "Coffee Shop", "Summer Night")
   - Volume slider (0-100%)
-- **Bottom Bar**: master volume, Play/Pause, sleep timer, and About controls
-- **Top Bar**: Simple app title "Blanket"
+- **Bottom Bar**: mute, Play/Pause, and overflow controls
+- **Top Bar**: preset selector, centered "Blanket" title, and app menu
 
 ### Audio Engine
 - **Multi-track Playback**: Uses Android MediaPlayer for each sound
@@ -116,9 +116,8 @@ com.vinberg88.blanketforandroid/
 
 ### Sound Library
 14 ambient sounds included:
-- Birds, Boat, Coffee Shop, Fireplace, Hello
-- Metro, New York City, Night, Pixel, Rain
-- River, Robot, Siren, Storm
+- Rain, Storm, Wind, Waves, Stream, Birds, Summer Night
+- Train, Boat, City, Coffee Shop, Fire Place, White Noise, Pink Noise
 
 ## Known Limitations in This Build Environment
 
