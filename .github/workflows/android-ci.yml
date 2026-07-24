@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, codex/play-store-ready-redesign]
+    branches: [main, agent/play-store-ready-redesign]
   workflow_dispatch:
 
 permissions:
