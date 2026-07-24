@@ -34,6 +34,10 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     private val _masterVolume = MutableStateFlow(1f)
     val masterVolume: StateFlow<Float> = _masterVolume.asStateFlow()
+    private var lastAudibleMasterVolume = 1f
+
+    private val _selectedPreset = MutableStateFlow("Default")
+    val selectedPreset: StateFlow<String> = _selectedPreset.asStateFlow()
 
     private val _sleepTimerMinutes = MutableStateFlow<Int?>(null)
     val sleepTimerMinutes: StateFlow<Int?> = _sleepTimerMinutes.asStateFlow()
@@ -59,6 +63,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             prefsRepository.masterVolume.collect { volume ->
                 _masterVolume.value = volume
+                if (volume > 0.01f) {
+                    lastAudibleMasterVolume = volume
+                }
                 audioPlayer.setMasterVolume(volume)
             }
         }
@@ -136,7 +143,42 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     fun setMasterVolume(volume: Float) {
         viewModelScope.launch {
+            if (volume > 0.01f) {
+                lastAudibleMasterVolume = volume
+            }
             prefsRepository.setMasterVolume(volume)
+        }
+    }
+
+    fun toggleMasterMute() {
+        setMasterVolume(
+            if (_masterVolume.value > 0.01f) 0f
+            else lastAudibleMasterVolume.coerceAtLeast(0.5f)
+        )
+    }
+
+    fun applyPreset(name: String) {
+        val mix = when (name) {
+            "Nature" -> mapOf("rain" to 0.55f, "stream" to 0.45f, "birds" to 0.35f)
+            "Focus" -> mapOf("rain" to 0.35f, "coffee_shop" to 0.28f, "pink_noise" to 0.22f)
+            "Sleep" -> mapOf("waves" to 0.50f, "summer_night" to 0.30f, "white_noise" to 0.18f)
+            else -> mapOf("rain" to 0.32f, "storm" to 0.52f, "waves" to 0.55f)
+        }
+
+        _selectedPreset.value = name
+        viewModelScope.launch {
+            availableSounds.forEach { sound ->
+                val volume = mix[sound.id] ?: 0.45f
+                val enabled = sound.id in mix
+                prefsRepository.setSoundVolume(sound.id, volume)
+                prefsRepository.setSoundEnabled(sound.id, enabled)
+                audioPlayer.setVolume(sound.id, volume)
+                if (_isPlaying.value && enabled) {
+                    audioPlayer.play(sound.id)
+                } else if (!enabled) {
+                    audioPlayer.pause(sound.id)
+                }
+            }
         }
     }
 

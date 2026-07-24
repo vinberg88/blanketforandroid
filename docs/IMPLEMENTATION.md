@@ -44,7 +44,7 @@ data class Sound(
 ```
 
 14 sounds are pre-configured with appropriate icons and display names:
-- Birds, Boat, Coffee Shop, Fireplace, Hello, Metro, NYC, Night, Pixel, Rain, River, Robot, Siren, Storm
+- Rain, Storm, Wind, Waves, Stream, Birds, Summer Night, Train, Boat, City, Coffee Shop, Fire Place, White Noise, Pink Noise
 
 #### `SoundState.kt`
 Represents the state of each sound:

@@ -92,7 +92,7 @@
   4. Sound should start playing and loop
 
 - [ ] **Multi-track playback**
-  1. Enable multiple sounds (e.g., "Rain", "Birds", "River")
+  1. Enable multiple sounds (e.g., "Rain", "Birds", "Stream")
   2. All circles should turn blue
   3. Tap Play button
   4. All enabled sounds should play simultaneously

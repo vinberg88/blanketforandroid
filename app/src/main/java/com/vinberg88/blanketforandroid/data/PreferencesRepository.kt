@@ -50,8 +50,11 @@ class PreferencesRepository(private val context: Context) {
     fun getSoundState(soundId: String): Flow<SoundState> = context.dataStore.data.map { preferences ->
         SoundState(
             soundId = soundId,
-            isEnabled = preferences[soundEnabledKey(soundId)] ?: false,
-            volume = preferences[soundVolumeKey(soundId)] ?: 0.5f
+            isEnabled = preferences[soundEnabledKey(soundId)]
+                ?: (soundId in DEFAULT_ENABLED_SOUNDS),
+            volume = preferences[soundVolumeKey(soundId)]
+                ?: DEFAULT_VOLUMES[soundId]
+                ?: 0.45f
         )
     }
 
@@ -108,5 +111,14 @@ class PreferencesRepository(private val context: Context) {
             preferences.remove(soundEnabledKey(soundId))
             preferences.remove(soundVolumeKey(soundId))
         }
+    }
+
+    companion object {
+        private val DEFAULT_ENABLED_SOUNDS = setOf("rain", "storm", "waves")
+        private val DEFAULT_VOLUMES = mapOf(
+            "rain" to 0.32f,
+            "storm" to 0.52f,
+            "waves" to 0.55f
+        )
     }
 }

@@ -23,8 +23,8 @@ Features:
 - Master volume for the full mix
 - Sleep timer with 15, 30 and 60 minute options
 - Smooth fade in and fade out
-- Light and dark theme support
-- Import, rename, edit and delete custom sounds
+- Purpose-built dark interface
+- Import custom sounds with Android's private document picker
 - No ads, accounts, analytics or tracking
 
 Blanket is useful for focus, relaxation, masking background noise, or falling asleep in a noisy environment.
@@ -40,9 +40,7 @@ Alternative: Health & Fitness or Lifestyle
 Capture phone screenshots for:
 
 - Dark theme mixer
-- Light theme mixer
 - Sleep timer dialog
-- Custom sound edit dialog
 - Active multi-sound mix with master volume visible
 
 ## Privacy Summary

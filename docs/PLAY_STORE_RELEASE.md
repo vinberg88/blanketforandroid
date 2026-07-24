@@ -4,18 +4,21 @@ This file tracks the release checklist for publishing Blanket for Android on Goo
 
 ## 1. Target SDK
 
-Google Play requires new apps and app updates submitted from 2025-08-31 to target Android 15 / API level 35 or higher.
+Google Play requires new apps and app updates submitted from 2026-08-31 to target Android 16 / API level 36 or higher.
 
 Current project status:
 
-- `compileSdk = 35`
-- `targetSdk = 35`
-- Local SDK requirement: install `platforms;android-35`
+- `compileSdk = 36`
+- `targetSdk = 36`
+- `applicationId = space.manus.blanket.android.t20260402202534`
+- `versionCode = 10001`
+- `versionName = 1.1.0`
+- Local SDK requirement: install `platforms;android-36`
 
 Useful install command:
 
 ```bash
-sdkmanager --install "platforms;android-35" "build-tools;35.0.0"
+sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
 ```
 
 ## 2. Privacy Policy and Data Safety
@@ -33,6 +36,9 @@ Suggested Google Play Data Safety answers:
 - Users can request deletion: Not applicable because no user data is collected by the developer
 - Data encrypted in transit: Not applicable because app data is not transmitted
 - App category note: Imported audio files remain local on the user's device and are selected through Android's system document picker
+- Permissions declaration: No sensitive or restricted Android permissions are requested
+- Ads declaration: No
+- App access: All functionality is available without an account or login
 
 Manual Play Console step:
 
@@ -48,7 +54,7 @@ Prepared assets:
 Still needed manually in Play Console:
 
 - Phone screenshots from a real device or emulator
-- 512 x 512 high-resolution app icon upload, if Play Console does not reuse the launcher icon
+- `docs/play-store/icon-512.png` is the 512 x 512 high-resolution store icon
 
 ## 4. Release Signing
 
@@ -123,6 +129,24 @@ Manual security checklist before production:
 
 - Review GitHub Dependabot alerts on the default branch
 - Merge or test Dependabot PRs one at a time
-- Run `./gradlew :app:compileDebugKotlin --no-daemon`
+- Run `./gradlew lintDebug testDebugUnitTest --no-daemon`
 - Run `./gradlew :app:buildBlanketReleaseBundle --no-daemon`
 - Test imported custom audio on a real Android device
+
+## 8. Play Console declarations
+
+Complete these manually in Play Console:
+
+- App category: Music & Audio
+- Ads: No
+- App access: No restricted access
+- Target audience: Select the actual intended age groups; the app is not specifically directed to children
+- Content rating: Complete the IARC questionnaire as a utility/audio app
+- Data safety: No data collected and no data shared
+- Government, health, finance, news, VPN and social declarations: Not applicable
+- Upload the signed `dist/blanket.aab` to an internal testing track first
+- Add at least one tester, install from Google Play, and verify playback, looping, import and the sleep timer
+
+The app uses Android's system document picker and therefore needs no broad storage or media permission.
+
+For personal developer accounts created after 13 November 2023, Google currently requires a closed test with at least 12 opted-in testers for 14 continuous days before production access can be requested.

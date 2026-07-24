@@ -16,6 +16,7 @@
         <item name="colorOnSurface">@color/light_text</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@color/dark_background</item>
+        <item name="android:navigationBarColor">@color/dark_surface</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

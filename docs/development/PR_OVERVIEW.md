@@ -155,7 +155,7 @@ implementation("androidx.datastore:datastore-preferences:1.0.0")
 - v1 focuses on core functionality
 - No background service (intentional)
 - Material icon placeholders (can add custom icons later)
-- All 14 sound files bundled in assets (150MB)
+- All 14 licensed Blanket sounds bundled as efficient Ogg Vorbis assets (about 17MB)
 
 ---
 

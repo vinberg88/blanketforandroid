@@ -16,7 +16,7 @@ Successfully implemented a complete Blanket audio mixer app for Android with dar
 ✅ Created `Sound.kt`:
 - Sound data class with id, fileName, displayName, icon
 - Pre-configured 14 sounds with pretty names and Material icons
-- Birds, Boat, Coffee Shop, Fireplace, Hello, Metro, NYC, Night, Pixel, Rain, River, Robot, Siren, Storm
+- Rain, Storm, Wind, Waves, Stream, Birds, Summer Night, Train, Boat, City, Coffee Shop, Fire Place, White Noise, Pink Noise
 
 ✅ Created `SoundState.kt`:
 - SoundState data class for enabled/volume state
