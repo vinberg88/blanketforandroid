@@ -66,11 +66,6 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         PlaybackController.onTogglePlayback = ::togglePlayPause
-        ContextCompat.startForegroundService(
-            getApplication(),
-            Intent(getApplication(), PlaybackForegroundService::class.java)
-                .setAction(PlaybackForegroundService.ACTION_RELEASE_EXTERNAL_PLAYBACK)
-        )
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
@@ -132,7 +127,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                             audioPlayer.play(state.soundId)
                         }
                     }
-                    startPlaybackService()
+                    if (states.values.any { it.isEnabled }) {
+                        startPlaybackService()
+                    }
                 }
             }
         }
@@ -380,6 +377,10 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 getApplication(),
                 Intent(getApplication(), PlaybackForegroundService::class.java)
                     .setAction(PlaybackForegroundService.ACTION_SYNC_FROM_PREFERENCES)
+            )
+        } else {
+            getApplication<Application>().stopService(
+                Intent(getApplication(), PlaybackForegroundService::class.java)
             )
         }
         super.onCleared()

@@ -23,10 +23,16 @@ import kotlinx.coroutines.launch
 
 class PlaybackForegroundService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private val externalAudioPlayer by lazy { AudioPlayer(applicationContext) }
+    private var externalAudioPlayer: AudioPlayer? = null
     private val externalLoadedSoundIds = mutableSetOf<String>()
 
+    override fun onCreate() {
+        super.onCreate()
+        externalAudioPlayer = AudioPlayer(applicationContext)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        createChannel()
         when (intent?.action) {
             ACTION_TOGGLE -> {
                 val toggle = PlaybackController.onTogglePlayback
@@ -45,7 +51,6 @@ class PlaybackForegroundService : Service() {
                 return START_NOT_STICKY
             }
         }
-        createChannel()
         val toggleIntent = PendingIntent.getBroadcast(
             this,
             1,
@@ -110,11 +115,11 @@ class PlaybackForegroundService : Service() {
         val enabledSounds = mutableSetOf<String>()
         sounds.forEach { sound ->
             val state = repository.getSoundState(sound.id).first()
-            externalAudioPlayer.setVolume(sound.id, state.volume)
+            externalAudioPlayer?.setVolume(sound.id, state.volume)
             if (state.isEnabled) enabledSounds.add(sound.id)
         }
-        externalAudioPlayer.setMasterVolume(repository.masterVolume.first())
-        externalAudioPlayer.resumeAll(enabledSounds)
+        externalAudioPlayer?.setMasterVolume(repository.masterVolume.first())
+        externalAudioPlayer?.resumeAll(enabledSounds)
     }
 
     private suspend fun ensureExternalSoundsLoaded(sounds: List<Sound>) {
@@ -122,20 +127,22 @@ class PlaybackForegroundService : Service() {
         sounds.forEach { sound ->
             if (externalLoadedSoundIds.add(sound.id)) {
                 if (sound.isCustom) {
-                    externalAudioPlayer.loadSoundFromUri(sound, android.net.Uri.parse(sound.fileName))
+                    externalAudioPlayer?.loadSoundFromUri(sound, android.net.Uri.parse(sound.fileName))
                 } else {
-                    externalAudioPlayer.loadSound(sound)
+                    externalAudioPlayer?.loadSound(sound)
                 }
             }
         }
     }
 
     private fun stopExternalPlayback() {
-        externalAudioPlayer.pauseAll()
+        externalAudioPlayer?.pauseAll()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        externalAudioPlayer?.release()
+        externalAudioPlayer = null
         serviceScope.cancel()
     }
 
