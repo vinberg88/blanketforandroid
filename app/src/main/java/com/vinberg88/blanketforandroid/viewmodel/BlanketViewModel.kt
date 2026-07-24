@@ -124,7 +124,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val currentState = _soundStates.value[soundId]
             val newEnabled = !(currentState?.isEnabled ?: false)
-            val volume = currentState?.volume ?: 0.45f
+            val volume = currentState?.volume ?: DEFAULT_SOUND_VOLUME
 
             prefsRepository.setSoundEnabled(soundId, newEnabled)
             PlaybackController.syncSoundState(getApplication(), soundId, newEnabled, volume, _isPlaying.value)
@@ -165,7 +165,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         _selectedPreset.value = name
         viewModelScope.launch {
             availableSounds.forEach { sound ->
-                val volume = mix[sound.id] ?: 0.45f
+                val volume = mix[sound.id] ?: DEFAULT_SOUND_VOLUME
                 val enabled = sound.id in mix
                 prefsRepository.setSoundVolume(sound.id, volume)
                 prefsRepository.setSoundEnabled(sound.id, enabled)
@@ -185,7 +185,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             allSounds.value.forEach { sound ->
                 val enabled = sound.id in mix.soundIds
-                val volume = mix.volumes[sound.id] ?: 0.45f
+                val volume = mix.volumes[sound.id] ?: DEFAULT_SOUND_VOLUME
                 prefsRepository.setSoundEnabled(sound.id, enabled)
                 prefsRepository.setSoundVolume(sound.id, volume)
                 PlaybackController.syncSoundState(
@@ -349,3 +349,5 @@ internal fun savedMixVolumesForEnabledSounds(states: Map<String, SoundState>): M
     states.values
         .filter { it.isEnabled }
         .associate { it.soundId to it.volume }
+
+private const val DEFAULT_SOUND_VOLUME = 0.45f

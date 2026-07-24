@@ -28,23 +28,7 @@ object PlaybackController {
 
     suspend fun startPlayback(context: Context, soundStates: Map<String, SoundState>? = null) {
         withInitializedController(context) { applicationContext, repository, player ->
-            player.setMasterVolume(repository.masterVolume.first())
-            ensureCustomSoundsLoaded(repository, player)
-
-            val states = soundStates ?: loadPersistedSoundStates(repository)
-            states.values.forEach { state ->
-                player.setVolume(state.soundId, state.volume)
-                if (state.isEnabled) {
-                    player.play(state.soundId)
-                } else {
-                    player.pause(state.soundId)
-                }
-            }
-
-            ContextCompat.startForegroundService(
-                applicationContext,
-                Intent(applicationContext, PlaybackForegroundService::class.java)
-            )
+            startPlaybackLocked(applicationContext, repository, player, soundStates)
         }
     }
 
