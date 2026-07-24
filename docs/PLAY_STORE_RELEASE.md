@@ -173,7 +173,7 @@ For local install testing, use the internal APK:
 Play Console can retain the warning **Restricted foreground service types** for
 the older Manus test bundle with `versionCode 10000`.
 
-The native Blanket `versionCode 10002` does not declare:
+The native Blanket `versionCode 10003` does not declare:
 
 - `BOOT_COMPLETED`
 - `RECEIVE_BOOT_COMPLETED`
