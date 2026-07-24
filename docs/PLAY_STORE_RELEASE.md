@@ -11,8 +11,8 @@ Current project status:
 - `compileSdk = 36`
 - `targetSdk = 36`
 - `applicationId = space.manus.blanket.android.t20260402202534`
-- `versionCode = 10002`
-- `versionName = 1.1.1`
+- `versionCode = 10003`
+- `versionName = 1.2.0`
 - Local SDK requirement: install `platforms;android-36`
 
 Useful install command:
@@ -141,7 +141,10 @@ After the secrets are configured, open **Actions > Signed Play release > Run
 workflow**. The workflow restores the private key only inside the temporary
 GitHub runner, builds `dist/blanket.aab`, verifies its signature, and publishes
 the `blanket-signed-play-aab` artifact. The signed-release workflow is manual so
-release secrets are not exposed to normal pull-request builds.
+release secrets are not exposed to normal pull-request builds. If any signing
+secret is missing, the workflow records the missing secret names in the run
+summary and skips all signing/build/upload steps; it does not produce a
+Play-uploadable artifact. Run it again only after all four secrets are configured.
 
 ## 5. Build Android App Bundle
 
@@ -177,9 +180,9 @@ The native Blanket `versionCode 10002` does not declare:
 - a foreground service
 - a foreground-service permission
 
-Upload and roll out the signed `10002` bundle to the same testing track. If Play
+Upload and roll out the signed `10003` bundle to the same testing track. If Play
 still lists the warning, open **View details > Affected bundles** and confirm
-whether it points to historical bundle `10000` or the new `10002`.
+whether it points to historical bundle `10000` or the new `10003`.
 
 Google Play never accepts a reused `versionCode`. If a bundle was already added
 to App bundle explorer or a draft release, increase the code and build a new
