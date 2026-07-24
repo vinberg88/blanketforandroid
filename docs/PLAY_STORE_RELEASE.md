@@ -60,6 +60,39 @@ Still needed manually in Play Console:
 
 Do not commit release keys.
 
+Because Blanket already exists in Google Play testing, first compare the SHA-256
+fingerprint under **Play Console > App integrity > Upload key certificate** with
+the key you intend to use. Existing releases must use the registered upload key.
+
+If the original upload key is unavailable, create a new upload key and request an
+upload-key reset in Play Console.
+
+### Windows and Android Studio
+
+WSL and Ubuntu are not required. In Android Studio select:
+
+1. **Build > Generate Signed Bundle / APK**
+2. **Android App Bundle**
+3. **Create new**
+4. Save the key outside the repository, for example:
+   `C:\Users\YOUR_NAME\AndroidKeys\blanket-upload-key.jks`
+5. Use the alias `blanket-upload` and a validity of at least 10,000 days
+
+Export the public upload certificate from PowerShell:
+
+```powershell
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" `
+  -export -rfc `
+  -keystore "$env:USERPROFILE\AndroidKeys\blanket-upload-key.jks" `
+  -alias blanket-upload `
+  -file "$env:USERPROFILE\AndroidKeys\blanket-upload-certificate.pem"
+```
+
+Only the `.pem` certificate is uploaded when requesting an upload-key reset.
+The private `.jks` file and its passwords must remain secret.
+
+### Command-line alternative
+
 Create a local upload key:
 
 ```bash
@@ -69,7 +102,7 @@ keytool -genkeypair \
   -keyalg RSA \
   -keysize 2048 \
   -validity 10000 \
-  -alias blanket
+  -alias blanket-upload
 ```
 
 Create a local `keystore.properties` file in the repository root:
@@ -77,11 +110,38 @@ Create a local `keystore.properties` file in the repository root:
 ```properties
 storeFile=blanket-upload-key.jks
 storePassword=YOUR_STORE_PASSWORD
-keyAlias=blanket
+keyAlias=blanket-upload
 keyPassword=YOUR_KEY_PASSWORD
 ```
 
-The Gradle release build reads `keystore.properties` automatically when it exists. The file and keystore are ignored by Git.
+The Gradle release build reads `keystore.properties` automatically when it
+exists. The file and keystore are ignored by Git.
+
+### Signed release through GitHub Actions
+
+Add these repository secrets under **Settings > Secrets and variables >
+Actions**:
+
+- `BLANKET_UPLOAD_KEYSTORE_BASE64`
+- `BLANKET_KEYSTORE_PASSWORD`
+- `BLANKET_KEY_ALIAS` (`blanket-upload`)
+- `BLANKET_KEY_PASSWORD`
+
+Create the Base64 value in Windows PowerShell:
+
+```powershell
+[Convert]::ToBase64String(
+  [IO.File]::ReadAllBytes(
+    "$env:USERPROFILE\AndroidKeys\blanket-upload-key.jks"
+  )
+) | Set-Clipboard
+```
+
+After the secrets are configured, open **Actions > Signed Play release > Run
+workflow**. The workflow restores the private key only inside the temporary
+GitHub runner, builds `dist/blanket.aab`, verifies its signature, and publishes
+the `blanket-signed-play-aab` artifact. The signed-release workflow is manual so
+release secrets are not exposed to normal pull-request builds.
 
 ## 5. Build Android App Bundle
 
@@ -105,7 +165,23 @@ For local install testing, use the internal APK:
 ./gradlew :app:buildBlanketInternalApk
 ```
 
-## 6. In-App About and Credits
+## 6. Android 15 foreground-service warning
+
+Play Console can retain the warning **Restricted foreground service types** for
+the older Manus test bundle with `versionCode 10000`.
+
+The native Blanket `versionCode 10001` does not declare:
+
+- `BOOT_COMPLETED`
+- `RECEIVE_BOOT_COMPLETED`
+- a foreground service
+- a foreground-service permission
+
+Upload and roll out the signed `10001` bundle to the same testing track. If Play
+still lists the warning, open **View details > Affected bundles** and confirm
+whether it points to historical bundle `10000` or the new `10001`.
+
+## 7. In-App About and Credits
 
 The app includes an About dialog from the bottom control bar.
 
@@ -118,7 +194,7 @@ It covers:
 - Local-only imported sounds note
 - No ads, accounts, analytics, or tracking
 
-## 7. Dependabot and Security
+## 8. Dependabot and Security
 
 Dependabot is enabled for:
 
