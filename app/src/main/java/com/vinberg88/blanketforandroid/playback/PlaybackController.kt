@@ -11,9 +11,9 @@ import com.vinberg88.blanketforandroid.model.availableSounds
 import com.vinberg88.blanketforandroid.model.iconForName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -23,40 +23,43 @@ import java.util.concurrent.ConcurrentHashMap
 object PlaybackController {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val initializationMutex = Mutex()
+    private val soundLoadMutex = Mutex()
+    private val toggleMutex = Mutex()
     private val loadedSoundIds = ConcurrentHashMap.newKeySet<String>()
 
-    private var prefsRepository: PreferencesRepository? = null
-    private var audioPlayer: AudioPlayer? = null
+    private lateinit var prefsRepository: PreferencesRepository
+    private lateinit var audioPlayer: AudioPlayer
     private var initializationJob: kotlinx.coroutines.Deferred<Unit>? = null
-    private var masterVolumeObserverStarted = false
+    private var masterVolumeObserverJob: Job? = null
 
     suspend fun ensureInitialized(context: Context) {
         val appContext = context.applicationContext
         val job = initializationMutex.withLock {
-            if (audioPlayer == null) {
+            if (!::audioPlayer.isInitialized) {
                 prefsRepository = PreferencesRepository(appContext)
                 audioPlayer = AudioPlayer(appContext)
             }
 
-            if (!masterVolumeObserverStarted) {
-                masterVolumeObserverStarted = true
-                val repository = requireNotNull(prefsRepository)
-                val player = requireNotNull(audioPlayer)
-                scope.launch {
-                    repository.masterVolume.collect { volume ->
-                        player.setMasterVolume(volume)
+            if (masterVolumeObserverJob == null) {
+                masterVolumeObserverJob = scope.launch {
+                    prefsRepository.masterVolume.collect { volume ->
+                        audioPlayer.setMasterVolume(volume)
                     }
                 }
             }
 
-            initializationJob ?: scope.async {
-                availableSounds.forEach { sound ->
-                    loadBuiltInSound(sound)
+            if (initializationJob == null) {
+                initializationJob = scope.async {
+                    availableSounds.forEach { sound ->
+                        loadBuiltInSound(sound)
+                    }
+                    prefsRepository.customSounds.first().forEach { metadata ->
+                        loadCustomSound(metadata)
+                    }
                 }
-                requireNotNull(prefsRepository).customSounds.first().forEach { metadata ->
-                    loadCustomSound(metadata)
-                }
-            }.also { initializationJob = it }
+            }
+
+            initializationJob!!
         }
 
         job.await()
@@ -64,94 +67,114 @@ object PlaybackController {
 
     suspend fun resumePlayback(context: Context, states: Collection<SoundState>) {
         ensureInitialized(context)
-        val player = requireNotNull(audioPlayer)
         val enabledSoundIds = states.filter { it.isEnabled }.map { state ->
-            player.setVolume(state.soundId, state.volume)
+            audioPlayer.setVolume(state.soundId, state.volume)
             state.soundId
         }.toSet()
 
-        player.resumeAll(enabledSoundIds)
+        audioPlayer.resumeAll(enabledSoundIds)
         PlaybackForegroundService.start(context)
     }
 
     suspend fun togglePlayback(context: Context) {
         ensureInitialized(context)
-        val repository = requireNotNull(prefsRepository)
-
-        if (repository.isPlaying.first()) {
-            repository.setIsPlaying(false)
-            pauseAll(context)
-        } else {
-            repository.setIsPlaying(true)
-            resumePlayback(context, currentSoundStates(repository))
+        toggleMutex.withLock {
+            if (prefsRepository.isPlaying.first()) {
+                prefsRepository.setIsPlaying(false)
+                pauseAll(context)
+            } else {
+                prefsRepository.setIsPlaying(true)
+                resumePlayback(context, currentSoundStates())
+            }
         }
     }
 
     suspend fun play(context: Context, soundId: String, volume: Float) {
         ensureInitialized(context)
-        val player = requireNotNull(audioPlayer)
-        player.setVolume(soundId, volume)
-        player.play(soundId)
+        audioPlayer.setVolume(soundId, volume)
+        audioPlayer.play(soundId)
     }
 
     suspend fun pause(context: Context, soundId: String) {
         ensureInitialized(context)
-        requireNotNull(audioPlayer).pause(soundId)
+        audioPlayer.pause(soundId)
     }
 
     suspend fun setVolume(context: Context, soundId: String, volume: Float) {
         ensureInitialized(context)
-        requireNotNull(audioPlayer).setVolume(soundId, volume)
+        audioPlayer.setVolume(soundId, volume)
     }
 
     suspend fun setMasterVolume(context: Context, volume: Float) {
         ensureInitialized(context)
-        requireNotNull(audioPlayer).setMasterVolume(volume)
+        audioPlayer.setMasterVolume(volume)
     }
 
     suspend fun pauseAll(context: Context) {
         ensureInitialized(context)
-        requireNotNull(audioPlayer).pauseAll()
+        audioPlayer.pauseAll()
         PlaybackForegroundService.stop(context)
     }
 
-    suspend fun loadCustomSound(context: Context, sound: Sound, uri: Uri) {
+    suspend fun loadCustomSound(context: Context, sound: Sound, uri: Uri): Boolean {
         ensureInitialized(context)
-        if (loadedSoundIds.add(sound.id)) {
-            requireNotNull(audioPlayer).loadSoundFromUri(sound, uri)
+        return soundLoadMutex.withLock {
+            if (sound.id in loadedSoundIds) return@withLock true
+
+            if (loadedSoundIds.add(sound.id)) {
+                val loaded = audioPlayer.loadSoundFromUri(sound, uri)
+                if (!loaded) {
+                    loadedSoundIds.remove(sound.id)
+                }
+                loaded
+            } else {
+                true
+            }
         }
     }
 
     suspend fun releaseSound(context: Context, soundId: String) {
         ensureInitialized(context)
-        requireNotNull(audioPlayer).releaseSound(soundId)
-        loadedSoundIds.remove(soundId)
+        soundLoadMutex.withLock {
+            audioPlayer.releaseSound(soundId)
+            loadedSoundIds.remove(soundId)
+        }
     }
 
-    private suspend fun currentSoundStates(repository: PreferencesRepository): List<SoundState> {
-        val customIds = repository.customSounds.first().map { it.id }
+    private suspend fun currentSoundStates(): List<SoundState> {
+        val customIds = prefsRepository.customSounds.first().map { it.id }
         return (availableSounds.map { it.id } + customIds)
             .distinct()
-            .map { soundId -> repository.getSoundState(soundId).first() }
+            .map { soundId -> prefsRepository.getSoundState(soundId).first() }
     }
 
     private suspend fun loadBuiltInSound(sound: Sound) {
-        if (loadedSoundIds.add(sound.id)) {
-            requireNotNull(audioPlayer).loadSound(sound)
+        soundLoadMutex.withLock {
+            if (loadedSoundIds.add(sound.id)) {
+                val loaded = audioPlayer.loadSound(sound)
+                if (!loaded) {
+                    loadedSoundIds.remove(sound.id)
+                }
+            }
         }
     }
 
     private suspend fun loadCustomSound(metadata: CustomSoundMetadata) {
-        if (loadedSoundIds.add(metadata.id)) {
-            val sound = Sound(
-                id = metadata.id,
-                fileName = metadata.uriString,
-                displayName = metadata.displayName,
-                icon = iconForName(metadata.iconName),
-                iconName = metadata.iconName,
-                isCustom = true
-            )
-            requireNotNull(audioPlayer).loadSoundFromUri(sound, Uri.parse(metadata.uriString))
+        soundLoadMutex.withLock {
+            if (loadedSoundIds.add(metadata.id)) {
+                val sound = Sound(
+                    id = metadata.id,
+                    fileName = metadata.uriString,
+                    displayName = metadata.displayName,
+                    icon = iconForName(metadata.iconName),
+                    iconName = metadata.iconName,
+                    isCustom = true
+                )
+                val loaded = audioPlayer.loadSoundFromUri(sound, Uri.parse(metadata.uriString))
+                if (!loaded) {
+                    loadedSoundIds.remove(metadata.id)
+                }
+            }
         }
     }
 }

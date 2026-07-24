@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class PlaybackCommandReceiver : BroadcastReceiver() {
@@ -12,10 +13,12 @@ class PlaybackCommandReceiver : BroadcastReceiver() {
         if (intent.action != PlaybackForegroundService.ACTION_TOGGLE) return
 
         val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.Main.immediate).launch {
+        val scope = CoroutineScope(Dispatchers.Main.immediate)
+        scope.launch {
             try {
                 PlaybackController.togglePlayback(context)
             } finally {
+                scope.cancel()
                 pendingResult.finish()
             }
         }

@@ -3,6 +3,7 @@ package com.vinberg88.blanketforandroid.viewmodel
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.lifecycle.AndroidViewModel
@@ -61,10 +62,6 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private var sleepTimerJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            PlaybackController.ensureInitialized(getApplication())
-        }
-
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
@@ -84,15 +81,25 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         // Load sounds and observe state changes
         viewModelScope.launch {
             val savedCustomSounds = prefsRepository.customSounds.first()
-            val loadedCustomSounds = savedCustomSounds.map { metadata ->
-                Sound(
-                    id = metadata.id,
-                    fileName = metadata.uriString,
-                    displayName = metadata.displayName,
-                    icon = iconForName(metadata.iconName),
-                    iconName = metadata.iconName,
-                    isCustom = true
-                )
+            val loadedCustomSounds = savedCustomSounds.mapNotNull { metadata ->
+                try {
+                    val sound = Sound(
+                        id = metadata.id,
+                        fileName = metadata.uriString,
+                        displayName = metadata.displayName,
+                        icon = iconForName(metadata.iconName),
+                        iconName = metadata.iconName,
+                        isCustom = true
+                    )
+                    if (PlaybackController.loadCustomSound(getApplication(), sound, Uri.parse(metadata.uriString))) {
+                        sound
+                    } else {
+                        null
+                    }
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Skipping invalid custom sound metadata: ${metadata.id}", exception)
+                    null
+                }
             }
             _customSounds.value = loadedCustomSounds
 
@@ -203,7 +210,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         if (cleanName.isEmpty()) return
         val states = _soundStates.value
         val enabled = states.values.filter { it.isEnabled }.map { it.soundId }.toSet()
-        val volumes = enabled.associateWith { soundId -> states.getValue(soundId).volume }
+        val volumes = enabled.mapNotNull { soundId ->
+            states[soundId]?.let { soundId to it.volume }
+        }.toMap()
         viewModelScope.launch {
             prefsRepository.saveMix(SavedMix("mix_${java.util.UUID.randomUUID()}", cleanName, enabled, volumes))
             _selectedPreset.value = cleanName
@@ -302,7 +311,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 iconName = "music_note",
                 isCustom = true
             )
-            PlaybackController.loadCustomSound(getApplication(), sound, uri)
+            if (!PlaybackController.loadCustomSound(getApplication(), sound, uri)) return@launch
             prefsRepository.saveCustomSound(
                 CustomSoundMetadata(
                     id = soundId,
@@ -343,5 +352,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     override fun onCleared() {
         super.onCleared()
+    }
+
+    companion object {
+        private const val TAG = "BlanketViewModel"
     }
 }

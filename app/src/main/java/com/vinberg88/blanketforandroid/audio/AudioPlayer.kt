@@ -22,8 +22,8 @@ class AudioPlayer(private val context: Context) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var masterVolume: Float = 1f
 
-    suspend fun loadSound(sound: Sound) {
-        withContext(Dispatchers.IO) {
+    suspend fun loadSound(sound: Sound): Boolean {
+        return withContext(Dispatchers.IO) {
             try {
                 if (!players.containsKey(sound.id)) {
                     val afd: AssetFileDescriptor = context.assets.openFd("sounds/${sound.fileName}")
@@ -36,19 +36,19 @@ class AudioPlayer(private val context: Context) {
                     players[sound.id] = mediaPlayer
                     Log.d(TAG, "Successfully loaded sound: ${sound.id}")
                 }
+                true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load sound: ${sound.id}, file: ${sound.fileName}", e)
+                false
             }
-
-            Unit
         }
     }
 
-    suspend fun loadSoundFromUri(sound: Sound, uri: Uri) {
-        withContext(Dispatchers.IO) {
+    suspend fun loadSoundFromUri(sound: Sound, uri: Uri): Boolean {
+        return withContext(Dispatchers.IO) {
             try {
                 if (!players.containsKey(sound.id)) {
-                    context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                    val loaded = context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
                         val mediaPlayer = MediaPlayer().apply {
                             setDataSource(pfd.fileDescriptor)
                             isLooping = true
@@ -56,13 +56,15 @@ class AudioPlayer(private val context: Context) {
                         }
                         players[sound.id] = mediaPlayer
                         Log.d(TAG, "Successfully loaded custom sound: ${sound.id}")
-                    }
+                        true
+                    } ?: false
+                    if (!loaded) return@withContext false
                 }
+                true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load custom sound: ${sound.id}", e)
+                false
             }
-
-            Unit
         }
     }
 
