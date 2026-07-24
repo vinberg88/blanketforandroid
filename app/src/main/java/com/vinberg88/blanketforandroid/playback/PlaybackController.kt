@@ -10,13 +10,17 @@ import com.vinberg88.blanketforandroid.model.Sound
 import com.vinberg88.blanketforandroid.model.SoundState
 import com.vinberg88.blanketforandroid.model.availableSounds
 import com.vinberg88.blanketforandroid.model.iconForName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 object PlaybackController {
     private val initMutex = Mutex()
+    private val cleanupScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var appContext: Context? = null
     private var prefsRepository: PreferencesRepository? = null
@@ -106,7 +110,7 @@ object PlaybackController {
 
     fun releaseIfNotPlaying(isPlaying: Boolean) {
         if (!isPlaying) {
-            runBlocking {
+            cleanupScope.launch {
                 initMutex.withLock {
                     audioPlayer?.release()
                     audioPlayer = null
@@ -161,7 +165,6 @@ object PlaybackController {
         player: AudioPlayer,
         soundStates: Map<String, SoundState>? = null
     ) {
-        player.setMasterVolume(repository.masterVolume.first())
         ensureCustomSoundsLoaded(repository, player)
 
         val states = soundStates ?: loadPersistedSoundStates(repository)
