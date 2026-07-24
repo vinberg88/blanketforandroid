@@ -2,13 +2,11 @@ package com.vinberg88.blanketforandroid.viewmodel
 
 import android.app.Application
 import android.content.Intent
-import androidx.core.content.ContextCompat
 import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.vinberg88.blanketforandroid.audio.AudioPlayer
 import com.vinberg88.blanketforandroid.data.CustomSoundMetadata
 import com.vinberg88.blanketforandroid.data.PreferencesRepository
 import com.vinberg88.blanketforandroid.data.SavedMix
@@ -17,7 +15,6 @@ import com.vinberg88.blanketforandroid.model.SoundState
 import com.vinberg88.blanketforandroid.model.availableSounds
 import com.vinberg88.blanketforandroid.model.iconForName
 import com.vinberg88.blanketforandroid.playback.PlaybackController
-import com.vinberg88.blanketforandroid.playback.PlaybackForegroundService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BlanketViewModel(application: Application) : AndroidViewModel(application) {
-    private val audioPlayer = AudioPlayer(application)
     private val prefsRepository = PreferencesRepository(application)
 
     private val _soundStates = MutableStateFlow<Map<String, SoundState>>(emptyMap())
@@ -65,7 +61,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private var sleepTimerJob: Job? = null
 
     init {
-        PlaybackController.onTogglePlayback = ::togglePlayPause
+        viewModelScope.launch {
+            PlaybackController.initialize(getApplication())
+        }
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
@@ -79,17 +77,12 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 if (volume > 0.01f) {
                     lastAudibleMasterVolume = volume
                 }
-                audioPlayer.setMasterVolume(volume)
+                PlaybackController.setMasterVolume(volume)
             }
         }
 
         // Load sounds and observe state changes
         viewModelScope.launch {
-            // Load built-in sounds
-            availableSounds.forEach { sound ->
-                audioPlayer.loadSound(sound)
-            }
-
             // Load persisted custom sounds
             val savedCustomSounds = prefsRepository.customSounds.first()
             val loadedCustomSounds = savedCustomSounds.mapNotNull { metadata ->
@@ -102,8 +95,11 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                         iconName = metadata.iconName,
                         isCustom = true
                     )
-                    audioPlayer.loadSoundFromUri(sound, Uri.parse(metadata.uriString))
-                    sound
+                    if (PlaybackController.loadCustomSound(getApplication(), sound, Uri.parse(metadata.uriString))) {
+                        sound
+                    } else {
+                        null
+                    }
                 } catch (e: Exception) {
                     null
                 }
@@ -121,12 +117,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
                 // Auto-restore playback on first load if was playing
                 if (hasAutoStarted.compareAndSet(false, true) && _isPlaying.value) {
-                    states.values.forEach { state ->
-                        if (state.isEnabled) {
-                            audioPlayer.setVolume(state.soundId, state.volume)
-                            audioPlayer.play(state.soundId)
-                        }
-                    }
+                    PlaybackController.startPlayback(getApplication(), states)
                 }
             }
         }
@@ -136,21 +127,17 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val currentState = _soundStates.value[soundId]
             val newEnabled = !(currentState?.isEnabled ?: false)
+            val volume = currentState?.volume ?: 0.45f
 
             prefsRepository.setSoundEnabled(soundId, newEnabled)
-
-            if (newEnabled && _isPlaying.value) {
-                audioPlayer.play(soundId)
-            } else if (!newEnabled && _isPlaying.value) {
-                audioPlayer.pause(soundId)
-            }
+            PlaybackController.syncSoundState(getApplication(), soundId, newEnabled, volume, _isPlaying.value)
         }
     }
 
     fun setSoundVolume(soundId: String, volume: Float) {
         viewModelScope.launch {
             prefsRepository.setSoundVolume(soundId, volume)
-            audioPlayer.setVolume(soundId, volume)
+            PlaybackController.updateSoundVolume(getApplication(), soundId, volume)
         }
     }
 
@@ -185,12 +172,13 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 val enabled = sound.id in mix
                 prefsRepository.setSoundVolume(sound.id, volume)
                 prefsRepository.setSoundEnabled(sound.id, enabled)
-                audioPlayer.setVolume(sound.id, volume)
-                if (_isPlaying.value && enabled) {
-                    audioPlayer.play(sound.id)
-                } else if (!enabled) {
-                    audioPlayer.pause(sound.id)
-                }
+                PlaybackController.syncSoundState(
+                    getApplication(),
+                    sound.id,
+                    enabled,
+                    volume,
+                    _isPlaying.value
+                )
             }
         }
     }
@@ -203,8 +191,13 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 val volume = mix.volumes[sound.id] ?: 0.45f
                 prefsRepository.setSoundEnabled(sound.id, enabled)
                 prefsRepository.setSoundVolume(sound.id, volume)
-                audioPlayer.setVolume(sound.id, volume)
-                if (_isPlaying.value && enabled) audioPlayer.play(sound.id) else audioPlayer.pause(sound.id)
+                PlaybackController.syncSoundState(
+                    getApplication(),
+                    sound.id,
+                    enabled,
+                    volume,
+                    _isPlaying.value
+                )
             }
         }
     }
@@ -214,7 +207,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         if (cleanName.isEmpty()) return
         val states = _soundStates.value
         val enabled = states.values.filter { it.isEnabled }.map { it.soundId }.toSet()
-        val volumes = states.mapValues { it.value.volume }
+        val volumes = savedMixVolumesForEnabledSounds(states)
         viewModelScope.launch {
             prefsRepository.saveMix(SavedMix("mix_${java.util.UUID.randomUUID()}", cleanName, enabled, volumes))
             _selectedPreset.value = cleanName
@@ -231,21 +224,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     fun togglePlayPause() {
         viewModelScope.launch {
-            val newPlaying = !_isPlaying.value
-            prefsRepository.setIsPlaying(newPlaying)
-
-            if (newPlaying) {
-                val enabledSounds = _soundStates.value
-                    .filter { it.value.isEnabled }
-                    .keys
-                audioPlayer.resumeAll(enabledSounds)
-                ContextCompat.startForegroundService(
-                    getApplication(), Intent(getApplication(), PlaybackForegroundService::class.java)
-                )
-            } else {
-                audioPlayer.pauseAll()
+            val newPlaying = PlaybackController.togglePlayback(getApplication(), _soundStates.value)
+            if (!newPlaying) {
                 cancelSleepTimer()
-                getApplication<Application>().stopService(Intent(getApplication(), PlaybackForegroundService::class.java))
             }
         }
     }
@@ -271,12 +252,15 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun fadeOutAndStop(durationMs: Long) {
         val originalMasterVolume = _masterVolume.value
         val steps = 15
-        repeat(steps) { step ->
-            val progress = (step + 1).toFloat() / steps
-            audioPlayer.setMasterVolume(originalMasterVolume * (1f - progress))
-            delay(durationMs / steps)
+        try {
+            repeat(steps) { step ->
+                val progress = (step + 1).toFloat() / steps
+                PlaybackController.setMasterVolume(originalMasterVolume * (1f - progress))
+                delay(durationMs / steps)
+            }
+        } finally {
+            PlaybackController.setMasterVolume(originalMasterVolume)
         }
-        audioPlayer.setMasterVolume(originalMasterVolume)
         stopAllSounds()
     }
 
@@ -287,8 +271,8 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         prefsRepository.setIsPlaying(false)
-        audioPlayer.pauseAll()
-        getApplication<Application>().stopService(Intent(getApplication(), PlaybackForegroundService::class.java))
+        PlaybackController.pauseAll()
+        PlaybackController.stopForegroundService()
         sleepTimerJob = null
         _sleepTimerMinutes.value = null
         _sleepTimerEndsAt.value = null
@@ -315,7 +299,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 iconName = "music_note",
                 isCustom = true
             )
-            audioPlayer.loadSoundFromUri(sound, uri)
+            if (!PlaybackController.loadCustomSound(getApplication(), sound, uri)) {
+                return@launch
+            }
             prefsRepository.saveCustomSound(
                 CustomSoundMetadata(
                     id = soundId,
@@ -347,8 +333,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     fun removeCustomSound(soundId: String) {
         viewModelScope.launch {
-            audioPlayer.pause(soundId)
-            audioPlayer.releaseSound(soundId)
+            PlaybackController.releaseSound(soundId)
             prefsRepository.removeCustomSound(soundId)
             _customSounds.value = _customSounds.value.filter { it.id != soundId }
         }
@@ -356,7 +341,11 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     override fun onCleared() {
         super.onCleared()
-        PlaybackController.onTogglePlayback = null
-        audioPlayer.release()
+        PlaybackController.releaseIfNotPlaying(_isPlaying.value)
     }
 }
+
+internal fun savedMixVolumesForEnabledSounds(states: Map<String, SoundState>): Map<String, Float> =
+    states.values
+        .filter { it.isEnabled }
+        .associate { it.soundId to it.volume }

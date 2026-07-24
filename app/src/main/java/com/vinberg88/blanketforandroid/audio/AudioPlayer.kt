@@ -77,6 +77,8 @@ class AudioPlayer(private val context: Context) {
         }
     }
 
+    fun hasSound(soundId: String): Boolean = players.containsKey(soundId)
+
     fun play(soundId: String) {
         players[soundId]?.let { player ->
             if (!player.isPlaying) {

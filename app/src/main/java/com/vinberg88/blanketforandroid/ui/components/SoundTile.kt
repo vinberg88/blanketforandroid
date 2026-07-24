@@ -85,11 +85,12 @@ fun SoundTile(
             )
         }
 
-        IconButton(onClick = onFavoriteToggle, modifier = Modifier.size(28.dp)) {
+        IconButton(onClick = onFavoriteToggle) {
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                 contentDescription = if (isFavorite) "Remove $name from favorites" else "Add $name to favorites",
-                tint = if (isFavorite) BlueAccent else MaterialTheme.colorScheme.onSurface
+                tint = if (isFavorite) BlueAccent else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(20.dp)
             )
         }
 
