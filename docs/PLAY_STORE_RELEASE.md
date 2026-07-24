@@ -8,17 +8,17 @@ Google Play requires new apps and app updates submitted from 2026-08-31 to targe
 
 Current project status:
 
-- `compileSdk = 36`
+- `compileSdk = 37`
 - `targetSdk = 36`
 - `applicationId = space.manus.blanket.android.t20260402202534`
 - `versionCode = 10001`
 - `versionName = 1.1.0`
-- Local SDK requirement: install `platforms;android-36`
+- Local SDK requirement: install `platforms;android-37`
 
 Useful install command:
 
 ```bash
-sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+sdkmanager --install "platforms;android-37" "build-tools;36.0.0"
 ```
 
 ## 2. Privacy Policy and Data Safety
