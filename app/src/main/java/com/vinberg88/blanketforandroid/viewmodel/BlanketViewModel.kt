@@ -249,6 +249,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun fadeOutAndStop(durationMs: Long) {
         val originalMasterVolume = _masterVolume.value
         val steps = 15
+        var completedFade = false
         try {
             repeat(steps) { step ->
                 val progress = (step + 1).toFloat() / steps
@@ -258,8 +259,11 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                 )
                 delay(durationMs / steps)
             }
+            completedFade = true
         } finally {
-            PlaybackController.setMasterVolume(getApplication(), originalMasterVolume)
+            if (!completedFade) {
+                PlaybackController.setMasterVolume(getApplication(), originalMasterVolume)
+            }
         }
         stopAllSounds()
     }

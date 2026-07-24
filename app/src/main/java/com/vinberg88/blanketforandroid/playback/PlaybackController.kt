@@ -20,7 +20,7 @@ import kotlinx.coroutines.sync.withLock
 
 object PlaybackController {
     private val initMutex = Mutex()
-    private val cleanupScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val commandScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var appContext: Context? = null
     private var prefsRepository: PreferencesRepository? = null
@@ -109,14 +109,14 @@ object PlaybackController {
     }
 
     fun releaseIfNotPlaying(isPlaying: Boolean) {
-        if (!isPlaying) {
-            cleanupScope.launch {
-                initMutex.withLock {
-                    audioPlayer?.release()
-                    audioPlayer = null
-                    prefsRepository = null
-                    appContext = null
-                }
+        if (!isPlaying && initMutex.tryLock()) {
+            try {
+                audioPlayer?.release()
+                audioPlayer = null
+                prefsRepository = null
+                appContext = null
+            } finally {
+                initMutex.unlock()
             }
         }
     }
@@ -126,6 +126,16 @@ object PlaybackController {
             applicationContext.stopService(
                 Intent(applicationContext, PlaybackForegroundService::class.java)
             )
+        }
+    }
+
+    fun togglePlaybackAsync(context: Context, onComplete: () -> Unit) {
+        commandScope.launch {
+            try {
+                togglePlayback(context)
+            } finally {
+                onComplete()
+            }
         }
     }
 
