@@ -209,7 +209,7 @@ Manual security checklist before production:
 - Run `./gradlew :app:buildBlanketReleaseBundle --no-daemon`
 - Test imported custom audio on a real Android device
 
-## 8. Play Console declarations
+## 9. Play Console declarations
 
 Complete these manually in Play Console:
 
