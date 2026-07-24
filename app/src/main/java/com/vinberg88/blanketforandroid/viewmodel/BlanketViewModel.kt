@@ -121,12 +121,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
                 // Auto-restore playback on first load if was playing
                 if (hasAutoStarted.compareAndSet(false, true) && _isPlaying.value) {
-                    states.values.forEach { state ->
-                        if (state.isEnabled) {
-                            audioPlayer.setVolume(state.soundId, state.volume)
-                            audioPlayer.play(state.soundId)
-                        }
-                    }
+                    startPlayback(states.values)
                 }
             }
         }
@@ -235,19 +230,24 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
             prefsRepository.setIsPlaying(newPlaying)
 
             if (newPlaying) {
-                val enabledSounds = _soundStates.value
-                    .filter { it.value.isEnabled }
-                    .keys
-                audioPlayer.resumeAll(enabledSounds)
-                ContextCompat.startForegroundService(
-                    getApplication(), Intent(getApplication(), PlaybackForegroundService::class.java)
-                )
+                startPlayback(_soundStates.value.values)
             } else {
                 audioPlayer.pauseAll()
                 cancelSleepTimer()
                 getApplication<Application>().stopService(Intent(getApplication(), PlaybackForegroundService::class.java))
             }
         }
+    }
+
+    private fun startPlayback(states: Collection<SoundState>) {
+        val enabledSounds = states.filter { it.isEnabled }
+        enabledSounds.forEach { state ->
+            audioPlayer.setVolume(state.soundId, state.volume)
+        }
+        audioPlayer.resumeAll(enabledSounds.map { it.soundId }.toSet())
+        ContextCompat.startForegroundService(
+            getApplication(), Intent(getApplication(), PlaybackForegroundService::class.java)
+        )
     }
 
     fun setSleepTimer(minutes: Int) {
