@@ -34,7 +34,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Check signing secrets
+      - name: Detect signing secrets
+        id: signing-secrets
         env:
           BLANKET_UPLOAD_KEYSTORE_BASE64: ${{ secrets.BLANKET_UPLOAD_KEYSTORE_BASE64 }}
           BLANKET_KEYSTORE_PASSWORD: ${{ secrets.BLANKET_KEYSTORE_PASSWORD }}
@@ -42,7 +43,7 @@ jobs:
           BLANKET_KEY_PASSWORD: ${{ secrets.BLANKET_KEY_PASSWORD }}
         shell: bash
         run: |
-          missing=0
+          missing=()
           for name in \
             BLANKET_UPLOAD_KEYSTORE_BASE64 \
             BLANKET_KEYSTORE_PASSWORD \
@@ -50,13 +51,33 @@ jobs:
             BLANKET_KEY_PASSWORD
           do
             if [ -z "${!name:-}" ]; then
-              echo "::error::$name is not configured"
-              missing=1
+              missing+=( "$name" )
             fi
           done
-          exit "$missing"
+
+          if [ "${#missing[@]}" -eq 0 ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Signed release preflight"
+              echo "All required signing secrets are configured."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Signed release not run"
+              echo
+              echo "The workflow was not configured for signing. Missing secrets:"
+              for name in "${missing[@]}"; do
+                echo "- `$name`"
+              done
+              echo
+              echo "Add the secrets and run this workflow again."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Signed AAB steps skipped because signing secrets are missing."
+          fi
 
       - name: Restore upload keystore
+        if: steps.signing-secrets.outputs.configured == 'true'
         env:
           BLANKET_UPLOAD_KEYSTORE_BASE64: ${{ secrets.BLANKET_UPLOAD_KEYSTORE_BASE64 }}
           BLANKET_KEYSTORE_PASSWORD: ${{ secrets.BLANKET_KEYSTORE_PASSWORD }}
@@ -74,6 +95,7 @@ jobs:
             -alias "$BLANKET_KEY_ALIAS" > /dev/null
 
       - name: Test and build signed Play bundle
+        if: steps.signing-secrets.outputs.configured == 'true'
         env:
           BLANKET_KEYSTORE_FILE: ${{ runner.temp }}/blanket-signing/blanket-upload-key.jks
           BLANKET_KEYSTORE_PASSWORD: ${{ secrets.BLANKET_KEYSTORE_PASSWORD }}
@@ -82,6 +104,7 @@ jobs:
         run: ./gradlew lintDebug testDebugUnitTest buildBlanketReleaseBundle --stacktrace
 
       - name: Verify AAB signature
+        if: steps.signing-secrets.outputs.configured == 'true'
         shell: bash
         run: |
           unzip -l dist/blanket.aab \
@@ -91,9 +114,14 @@ jobs:
           grep -q "jar verified." "$RUNNER_TEMP/jarsigner-verification.txt"
 
       - name: Upload signed Play bundle
+        if: steps.signing-secrets.outputs.configured == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: blanket-signed-play-aab
           path: dist/blanket.aab
           if-no-files-found: error
           retention-days: 30
+
+      - name: Confirm skipped signing
+        if: steps.signing-secrets.outputs.configured != 'true'
+        run: echo "No signed artifact was produced because signing secrets are missing."
