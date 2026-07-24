@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.vinberg88.blanketforandroid.BuildConfig
+import com.vinberg88.blanketforandroid.model.Sound
 import com.vinberg88.blanketforandroid.ui.components.SoundTile
 import com.vinberg88.blanketforandroid.viewmodel.BlanketViewModel
 
@@ -259,7 +260,10 @@ fun MainScreen(viewModel: BlanketViewModel) {
     ) { paddingValues ->
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val columns = when { maxWidth >= 840.dp -> 6; maxWidth >= 600.dp -> 5; else -> 4 }
-            val orderedSounds = allSounds.sortedWith(compareByDescending { it.id in favoriteSoundIds }.thenBy { it.displayName })
+            val orderedSounds = allSounds.sortedWith(
+                compareByDescending<Sound> { it.id in favoriteSoundIds }
+                    .thenBy { it.displayName }
+            )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(columns), contentPadding = paddingValues,
                 modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
