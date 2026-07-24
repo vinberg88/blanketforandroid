@@ -35,8 +35,8 @@ android {
         applicationId = "space.manus.blanket.android.t20260402202534"
         minSdk = 23
         targetSdk = 36
-        versionCode = 10001
-        versionName = "1.1.0"
+        versionCode = 10002
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -80,6 +80,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
