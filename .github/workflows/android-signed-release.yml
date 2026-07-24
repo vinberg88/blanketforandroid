@@ -1,0 +1,99 @@
+name: Signed Play release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blanket-signed-play-release
+  cancel-in-progress: false
+
+jobs:
+  build-signed-aab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 16 SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Check signing secrets
+        env:
+          BLANKET_UPLOAD_KEYSTORE_BASE64: ${{ secrets.BLANKET_UPLOAD_KEYSTORE_BASE64 }}
+          BLANKET_KEYSTORE_PASSWORD: ${{ secrets.BLANKET_KEYSTORE_PASSWORD }}
+          BLANKET_KEY_ALIAS: ${{ secrets.BLANKET_KEY_ALIAS }}
+          BLANKET_KEY_PASSWORD: ${{ secrets.BLANKET_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          missing=0
+          for name in \
+            BLANKET_UPLOAD_KEYSTORE_BASE64 \
+            BLANKET_KEYSTORE_PASSWORD \
+            BLANKET_KEY_ALIAS \
+            BLANKET_KEY_PASSWORD
+          do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::$name is not configured"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Restore upload keystore
+        env:
+          BLANKET_UPLOAD_KEYSTORE_BASE64: ${{ secrets.BLANKET_UPLOAD_KEYSTORE_BASE64 }}
+          BLANKET_KEYSTORE_PASSWORD: ${{ secrets.BLANKET_KEYSTORE_PASSWORD }}
+          BLANKET_KEY_ALIAS: ${{ secrets.BLANKET_KEY_ALIAS }}
+          BLANKET_KEYSTORE_FILE: ${{ runner.temp }}/blanket-signing/blanket-upload-key.jks
+        shell: bash
+        run: |
+          umask 077
+          mkdir -p "$(dirname "$BLANKET_KEYSTORE_FILE")"
+          printf '%s' "$BLANKET_UPLOAD_KEYSTORE_BASE64" \
+            | base64 --decode > "$BLANKET_KEYSTORE_FILE"
+          keytool -list \
+            -keystore "$BLANKET_KEYSTORE_FILE" \
+            -storepass "$BLANKET_KEYSTORE_PASSWORD" \
+            -alias "$BLANKET_KEY_ALIAS" > /dev/null
+
+      - name: Test and build signed Play bundle
+        env:
+          BLANKET_KEYSTORE_FILE: ${{ runner.temp }}/blanket-signing/blanket-upload-key.jks
+          BLANKET_KEYSTORE_PASSWORD: ${{ secrets.BLANKET_KEYSTORE_PASSWORD }}
+          BLANKET_KEY_ALIAS: ${{ secrets.BLANKET_KEY_ALIAS }}
+          BLANKET_KEY_PASSWORD: ${{ secrets.BLANKET_KEY_PASSWORD }}
+        run: ./gradlew lintDebug testDebugUnitTest buildBlanketReleaseBundle --stacktrace
+
+      - name: Verify AAB signature
+        shell: bash
+        run: |
+          unzip -l dist/blanket.aab \
+            | grep -Eq 'META-INF/.*\.(RSA|DSA|EC)$'
+          jarsigner -verify -verbose -certs dist/blanket.aab \
+            | tee "$RUNNER_TEMP/jarsigner-verification.txt"
+          grep -q "jar verified." "$RUNNER_TEMP/jarsigner-verification.txt"
+
+      - name: Upload signed Play bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: blanket-signed-play-aab
+          path: dist/blanket.aab
+          if-no-files-found: error
+          retention-days: 30
