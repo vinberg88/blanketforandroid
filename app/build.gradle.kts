@@ -32,7 +32,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "space.manus.blanket.android.t20260402202534"
+        applicationId = "com.vinberg88.blanket"
         minSdk = 23
         targetSdk = 36
         versionCode = 10003
