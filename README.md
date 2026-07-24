@@ -2,9 +2,9 @@
 
 TEST APP HERE. IT WILL BE BETTER BUT FOR NOW SO WE CAN START WORK ON BLANKET FOR ANDROID.
 
-https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10000
+https://play.google.com/store/apps/details?id=com.vinberg88.blanket&pcampaignid=web_share
 
-<a href="https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10000"><img width="200" alt="Download via PlayStore" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"/></a>
+<a href="https://play.google.com/store/apps/details?id=com.vinberg88.blanket&pcampaignid=web_share"><img width="200" alt="Download via PlayStore" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"/></a>
 
 - Android is a trademark of Google LLC. By Mattias Vinberg for Google PLAY.
 
