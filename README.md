@@ -8,8 +8,6 @@ https://play.google.com/apps/test/space.manus.blanket.android.t20260402202534/10
 
 - Android is a trademark of Google LLC. By Mattias Vinberg for Google PLAY.
 
-<meta name="google-site-verification" content="YTE6KNAH688qJUuSz1c7AYMcH7jA3K_T_vonABzvjx8" />
-
 # Blanket for ANDROID - Listen to different sounds and Relax. 
 
 UPDATE 2026-06-17 - I have posted BLANKET to play store and are waiting for the green light to publish Blanket
