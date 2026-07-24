@@ -66,6 +66,11 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         PlaybackController.onTogglePlayback = ::togglePlayPause
+        ContextCompat.startForegroundService(
+            getApplication(),
+            Intent(getApplication(), PlaybackForegroundService::class.java)
+                .setAction(PlaybackForegroundService.ACTION_RELEASE_EXTERNAL_PLAYBACK)
+        )
         // Load saved playing state
         viewModelScope.launch {
             prefsRepository.isPlaying.collect { playing ->
@@ -127,6 +132,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                             audioPlayer.play(state.soundId)
                         }
                     }
+                    startPlaybackService()
                 }
             }
         }
@@ -214,7 +220,9 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
         if (cleanName.isEmpty()) return
         val states = _soundStates.value
         val enabled = states.values.filter { it.isEnabled }.map { it.soundId }.toSet()
-        val volumes = states.mapValues { it.value.volume }
+        val volumes = states
+            .filterValues { it.isEnabled }
+            .mapValues { it.value.volume }
         viewModelScope.launch {
             prefsRepository.saveMix(SavedMix("mix_${java.util.UUID.randomUUID()}", cleanName, enabled, volumes))
             _selectedPreset.value = cleanName
@@ -239,9 +247,7 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
                     .filter { it.value.isEnabled }
                     .keys
                 audioPlayer.resumeAll(enabledSounds)
-                ContextCompat.startForegroundService(
-                    getApplication(), Intent(getApplication(), PlaybackForegroundService::class.java)
-                )
+                startPlaybackService()
             } else {
                 audioPlayer.pauseAll()
                 cancelSleepTimer()
@@ -271,13 +277,27 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun fadeOutAndStop(durationMs: Long) {
         val originalMasterVolume = _masterVolume.value
         val steps = 15
-        repeat(steps) { step ->
-            val progress = (step + 1).toFloat() / steps
-            audioPlayer.setMasterVolume(originalMasterVolume * (1f - progress))
-            delay(durationMs / steps)
+        var completed = false
+        try {
+            repeat(steps) { step ->
+                val progress = (step + 1).toFloat() / steps
+                audioPlayer.setMasterVolume(originalMasterVolume * (1f - progress))
+                delay(durationMs / steps)
+            }
+            completed = true
+        } finally {
+            audioPlayer.setMasterVolume(originalMasterVolume)
         }
-        audioPlayer.setMasterVolume(originalMasterVolume)
-        stopAllSounds()
+        if (completed) {
+            stopAllSounds()
+        }
+    }
+
+    private fun startPlaybackService() {
+        ContextCompat.startForegroundService(
+            getApplication(),
+            Intent(getApplication(), PlaybackForegroundService::class.java)
+        )
     }
 
     private suspend fun stopAllSounds() {
@@ -355,6 +375,13 @@ class BlanketViewModel(application: Application) : AndroidViewModel(application)
     }
 
     override fun onCleared() {
+        if (_isPlaying.value) {
+            ContextCompat.startForegroundService(
+                getApplication(),
+                Intent(getApplication(), PlaybackForegroundService::class.java)
+                    .setAction(PlaybackForegroundService.ACTION_SYNC_FROM_PREFERENCES)
+            )
+        }
         super.onCleared()
         PlaybackController.onTogglePlayback = null
         audioPlayer.release()
