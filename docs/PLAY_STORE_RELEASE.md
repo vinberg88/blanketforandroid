@@ -10,7 +10,7 @@ Current project status:
 
 - `compileSdk = 36`
 - `targetSdk = 36`
-- `applicationId = space.manus.blanket.android.t20260402202534`
+- `applicationId = com.vinberg88.blanket`
 - `versionCode = 10003`
 - `versionName = 1.2.0`
 - Local SDK requirement: install `platforms;android-36`
