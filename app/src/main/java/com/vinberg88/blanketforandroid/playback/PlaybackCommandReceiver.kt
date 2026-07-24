@@ -6,6 +6,8 @@ import android.content.Intent
 
 class PlaybackCommandReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == PlaybackForegroundService.ACTION_TOGGLE) PlaybackController.onTogglePlayback?.invoke()
+        if (intent.action == PlaybackForegroundService.ACTION_TOGGLE) {
+            PlaybackController.togglePlayback(context)
+        }
     }
 }
