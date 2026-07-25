@@ -53,7 +53,12 @@ class PlaybackForegroundService : Service() {
         if (prefsRepository.isPlaying.first()) {
             SharedAudioPlayer.get(applicationContext).pauseAll()
             prefsRepository.setIsPlaying(false)
-            stopForeground(STOP_FOREGROUND_REMOVE)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                            stopForeground(STOP_FOREGROUND_REMOVE)
+                        } else {
+                                            @Suppress("DEPRECATION")
+                                                            stopForeground(true)
+                        }
             stopSelf()
         } else {
             startPlaybackFromPreferences()
