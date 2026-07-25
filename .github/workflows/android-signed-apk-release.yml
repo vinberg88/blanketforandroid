@@ -85,7 +85,13 @@ jobs:
           wc -c < "$BLANKET_KEYSTORE_FILE"
           echo "Decoded keystore sha256:"
           sha256sum "$BLANKET_KEYSTORE_FILE"
-          echo "Running keytool -list (verbose, not suppressed)..."
+          echo "Alias value length (chars):"
+          printf '%s' "$BLANKET_KEY_ALIAS" | wc -c
+          echo "Alias value sha256 (safe to view, not the alias itself):"
+          printf '%s' "$BLANKET_KEY_ALIAS" | sha256sum
+          echo "Listing ALL aliases in the keystore (no -alias filter):"
+          keytool -list -keystore "$BLANKET_KEYSTORE_FILE" -storepass "$BLANKET_KEYSTORE_PASSWORD"
+          echo "Running keytool -list -alias (verbose, not suppressed)..."
           keytool -list -keystore "$BLANKET_KEYSTORE_FILE" -storepass "$BLANKET_KEYSTORE_PASSWORD" -alias "$BLANKET_KEY_ALIAS"
           KEYTOOL_EXIT=$?
           echo "keytool exit code: $KEYTOOL_EXIT"
