@@ -72,30 +72,31 @@ jobs:
           BLANKET_KEYSTORE_FILE: ${{ runner.temp }}/blanket-signing/blanket-upload-key.jks
           BLANKET_KEYSTORE_PASSWORD: ${{ secrets.BLANKET_KEYSTORE_PASSWORD }}
           BLANKET_KEY_ALIAS: ${{ secrets.BLANKET_KEY_ALIAS }}
+          BLANKET_KEY_PASSWORD: ${{ secrets.BLANKET_KEY_PASSWORD }}
         shell: bash
         run: |
           set +e
           umask 077
           mkdir -p "$(dirname "$BLANKET_KEYSTORE_FILE")"
-          echo "Base64 secret length (chars):"
-          printf '%s' "$BLANKET_UPLOAD_KEYSTORE_BASE64" | wc -c
           printf '%s' "$BLANKET_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$BLANKET_KEYSTORE_FILE"
-          echo "base64 decode exit code: $?"
           echo "Decoded keystore file size (bytes):"
           wc -c < "$BLANKET_KEYSTORE_FILE"
           echo "Decoded keystore sha256:"
           sha256sum "$BLANKET_KEYSTORE_FILE"
-          echo "Alias value length (chars):"
+          echo "storePassword length (chars) and sha256:"
+          printf '%s' "$BLANKET_KEYSTORE_PASSWORD" | wc -c
+          printf '%s' "$BLANKET_KEYSTORE_PASSWORD" | sha256sum
+          echo "keyPassword length (chars) and sha256:"
+          printf '%s' "$BLANKET_KEY_PASSWORD" | wc -c
+          printf '%s' "$BLANKET_KEY_PASSWORD" | sha256sum
+          echo "alias length (chars) and sha256:"
           printf '%s' "$BLANKET_KEY_ALIAS" | wc -c
-          echo "Alias value sha256 (safe to view, not the alias itself):"
           printf '%s' "$BLANKET_KEY_ALIAS" | sha256sum
-          echo "Listing ALL aliases in the keystore (no -alias filter):"
+          echo "Listing keystore entries:"
           keytool -list -keystore "$BLANKET_KEYSTORE_FILE" -storepass "$BLANKET_KEYSTORE_PASSWORD"
-          echo "Running keytool -list -alias (verbose, not suppressed)..."
-          keytool -list -keystore "$BLANKET_KEYSTORE_FILE" -storepass "$BLANKET_KEYSTORE_PASSWORD" -alias "$BLANKET_KEY_ALIAS"
-          KEYTOOL_EXIT=$?
-          echo "keytool exit code: $KEYTOOL_EXIT"
-          exit $KEYTOOL_EXIT
+          echo "Testing full key read with keypass (mimics AGP signing read):"
+          keytool -list -v -keystore "$BLANKET_KEYSTORE_FILE" -storepass "$BLANKET_KEYSTORE_PASSWORD" -alias "$BLANKET_KEY_ALIAS" -keypass "$BLANKET_KEY_PASSWORD" 2>&1 | head -40
+          echo "diagnostics done"
 
       - name: Test and build signed release APK
         if: steps.signing-secrets.outputs.configured == 'true'
