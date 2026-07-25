@@ -32,11 +32,6 @@ What changed:
 - Imported sounds still use Android document permissions so they can keep working after app restart.
 - Gradle memory setting was lowered from 2048 MB to 1024 MB to make local builds easier on smaller machines.
 
-Build verification used for this update:
-
-- `./gradlew.bat :app:compileDebugKotlin --no-daemon`
-- `./gradlew.bat assembleDebug --no-daemon`
-
 ## UPDATE 2026-07-18 - Play Store launch preparation
 
 The Android project has also been prepared for a Google Play launch.
@@ -70,13 +65,13 @@ Improve focus and increase your productivity by listening to different sounds. B
 
 <img width="570" height="650" alt="image" src="https://github.com/user-attachments/assets/91e1c6ce-80da-4a98-85a0-21925584f293" />
 
+Android - What it looks like - BLANKET Version 1.0.1
+
 <img width="600" height="1050" alt="INTRO" src="https://github.com/user-attachments/assets/424ae701-45e8-4949-83d9-bb75e88c692b" />
 
 <img width="600" height="1050" alt="FRONT" src="https://github.com/user-attachments/assets/623f3ad2-9bef-4957-9694-1d0ac806aa82" />
 
-Android - What it looks like - BLANKET Version 1.0.1
-
-What it looks like now on Version 1.1.6
+What it looks like now on Version 1.1.6 via GOOGEL PLAY STORE
 
 <img width="600" height="1050" alt="blanket" src="https://github.com/user-attachments/assets/2066db28-97d1-46e7-9f17-f24e7f3bd73f" />
 
