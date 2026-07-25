@@ -10,7 +10,7 @@ https://play.google.com/store/apps/details?id=com.vinberg88.blanket&pcampaignid=
 
 # Blanket for ANDROID - Listen to different sounds and Relax. 
 
-UPDATE 2026-06-17 - I have posted BLANKET to play store and are waiting for the green light to publish Blanket
+UPDATE 2026-07-26 - I have posted BLANKET to play store and are waiting for the green light to publish Blanket
 for all user via GOOGLE. But it take some time.... No stress
 
 ## UPDATE 2026-06-18 - Blanket Android mixer refresh
@@ -37,7 +37,7 @@ Build verification used for this update:
 - `./gradlew.bat :app:compileDebugKotlin --no-daemon`
 - `./gradlew.bat assembleDebug --no-daemon`
 
-## UPDATE 2026-06-18 - Play Store launch preparation
+## UPDATE 2026-07-18 - Play Store launch preparation
 
 The Android project has also been prepared for a Google Play launch.
 
