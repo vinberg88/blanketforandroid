@@ -74,10 +74,22 @@ jobs:
           BLANKET_KEY_ALIAS: ${{ secrets.BLANKET_KEY_ALIAS }}
         shell: bash
         run: |
+          set +e
           umask 077
           mkdir -p "$(dirname "$BLANKET_KEYSTORE_FILE")"
+          echo "Base64 secret length (chars):"
+          printf '%s' "$BLANKET_UPLOAD_KEYSTORE_BASE64" | wc -c
           printf '%s' "$BLANKET_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$BLANKET_KEYSTORE_FILE"
-          keytool -list -keystore "$BLANKET_KEYSTORE_FILE" -storepass "$BLANKET_KEYSTORE_PASSWORD" -alias "$BLANKET_KEY_ALIAS" > /dev/null
+          echo "base64 decode exit code: $?"
+          echo "Decoded keystore file size (bytes):"
+          wc -c < "$BLANKET_KEYSTORE_FILE"
+          echo "Decoded keystore sha256:"
+          sha256sum "$BLANKET_KEYSTORE_FILE"
+          echo "Running keytool -list (verbose, not suppressed)..."
+          keytool -list -keystore "$BLANKET_KEYSTORE_FILE" -storepass "$BLANKET_KEYSTORE_PASSWORD" -alias "$BLANKET_KEY_ALIAS"
+          KEYTOOL_EXIT=$?
+          echo "keytool exit code: $KEYTOOL_EXIT"
+          exit $KEYTOOL_EXIT
 
       - name: Test and build signed release APK
         if: steps.signing-secrets.outputs.configured == 'true'
