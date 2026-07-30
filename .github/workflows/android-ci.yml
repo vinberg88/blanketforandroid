@@ -42,14 +42,14 @@ jobs:
         run: ./gradlew lintDebug testDebugUnitTest assembleInternal bundleRelease --stacktrace
 
       - name: Upload installable APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blanket-internal-apk
           path: app/build/outputs/apk/internal/*.apk
           if-no-files-found: error
 
       - name: Upload Play bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blanket-release-aab
           path: app/build/outputs/bundle/release/*.aab
