@@ -115,7 +115,7 @@ jobs:
 
       - name: Upload signed Play bundle
         if: steps.signing-secrets.outputs.configured == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blanket-signed-play-aab
           path: dist/blanket.aab
